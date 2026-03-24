@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 /* latin-ext */
 @font-face {
   font-family: 'Lato';
@@ -328,8 +330,9 @@ hr {
 .about-table .about-photo {
   flex: 0 0 auto;
   width: 200px !important;
-  padding: 0 28px 16px 0 !important;
+  padding: 0 0 16px 0 !important;
   vertical-align: top !important;
+  text-align: center;
 }
 
 .about-table .about-desc {
@@ -346,13 +349,21 @@ hr {
 }
 
 @media (max-width: 560px) {
-  .about-table tbody tr { flex-direction: column; }
+  .about-table tbody tr { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
   .about-table .about-photo {
     width: 100% !important;
     padding: 0 0 20px !important;
     text-align: center;
+    margin: 0 auto;
   }
-  .about-table .about-photo .profile-photo { max-width: 120px; }
+  .about-table .about-photo .profile-photo { 
+    max-width: 120px;
+    margin: 0 auto;
+  }
 }
 
 /* ===== News section ===== */
