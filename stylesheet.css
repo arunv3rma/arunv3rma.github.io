@@ -329,16 +329,16 @@ hr {
 
 .about-table .about-photo {
   flex: 0 0 auto;
-  width: 200px !important;
-  padding: 0 0 16px 0 !important;
-  vertical-align: top !important;
+  width: 200px;
+  padding: 0 0 16px 0;
+  vertical-align: top;
   text-align: center;
 }
 
 .about-table .about-desc {
   flex: 1 1 280px;
-  padding: 0 !important;
-  vertical-align: top !important;
+  padding: 0;
+  vertical-align: top;
 }
 
 .about-table .about-desc p {
@@ -355,8 +355,8 @@ hr {
     align-items: center;
   }
   .about-table .about-photo {
-    width: 100% !important;
-    padding: 0 0 20px !important;
+    width: 100%;
+    padding: 0 0 20px;
     text-align: center;
     margin: 0 auto;
   }
