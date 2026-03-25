@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MineDraft: A Framework for Batch Parallel Speculative Decoding</title>
+<link rel="icon" type="image/png" href="pickaxe.PNG">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,ital,wght@8..60,0,400;8..60,0,600;8..60,0,700;8..60,1,400;8..60,1,600&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap');
+
+/* ─── TOKENS ─────────────────────────────────────────────── */
+:root {
+  --serif: 'Source Serif 4', Georgia, serif;
+  --sans:  'DM Sans', -apple-system, sans-serif;
+  --mono:  'DM Mono', 'SF Mono', Consolas, monospace;
+  --nav-h: 0px;
+  --toc-w: 172px;
+  --col:   740px;
+
+  /* dark palette */
+  --bg:       #090c14;
+  --bg1:      #0e1220;
+  --bg2:      #131828;
+  --bg3:      #181e30;
+  --bg4:      #1e2538;
+
+  /* amber — primary accent */
+  --a:        #f59e0b;
+  --a2:       #fbbf24;
+  --a-dim:    rgba(245,158,11,.15);
+  --a-glow:   rgba(245,158,11,.08);
+
+  /* blue — verification */
+  --b:        #60a5fa;
+  --b-dim:    rgba(96,165,250,.15);
+
+  /* green — positive metric */
+  --g:        #34d399;
+  --g-dim:    rgba(52,211,153,.12);
+
+  /* border / line */
+  --border:   rgba(255,255,255,.07);
+  --border2:  rgba(255,255,255,.13);
+
+  /* text */
+  --t1: #f1f5f9;
+  --t2: #c8d3e0;
+  --t3: #8899aa;
+  --t4: #556070;
+  --t5: #3a4455;
+}
+
+[data-theme="light"] {
+  --bg:       #f8f6f1;
+  --bg1:      #f0ede6;
+  --bg2:      #e8e4db;
+  --bg3:      #dedad0;
+  --bg4:      #d4cfC4;
+
+  --a:        #b45309;
+  --a2:       #d97706;
+  --a-dim:    rgba(180,83,9,.12);
+  --a-glow:   rgba(180,83,9,.06);
+
+  --b:        #1d4ed8;
+  --b-dim:    rgba(29,78,216,.12);
+
+  --g:        #047857;
+  --g-dim:    rgba(4,120,87,.10);
+
+  --border:   rgba(0,0,0,.09);
+  --border2:  rgba(0,0,0,.16);
+
+  --t1: #1a1a1a;
+  --t2: #2d3748;
+  --t3: #4a5568;
+  --t4: #718096;
+  --t5: #a0aec0;
+}
+
+/* ─── RESET ──────────────────────────────────────────────── */
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box }
+html { scroll-behavior:smooth; scroll-padding-top:calc(var(--nav-h) + 28px) }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--t2);
+  font-size: 17px;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--a); text-decoration: none; transition: color .15s }
+a:hover { color: var(--a2) }
+::selection { background: var(--a); color: #000 }
+img { max-width:100%; display:block }
+[id] { scroll-margin-top: calc(var(--nav-h) + 28px) }
+
+/* ─── NAV ────────────────────────────────────────────────── */
+.nav {
+  position: sticky; top:0; z-index:200;
+  height: var(--nav-h);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-brand {
+  display: flex; align-items: center; gap:9px;
+  font-family: var(--sans); font-size:15px; font-weight:700;
+  color: var(--t1); letter-spacing:.02em;
+}
+.nav-brand-icon { font-size:18px; line-height:1 }
+.nav-links { display:flex; align-items:center; gap:2px }
+.nav-a {
+  font-size:13px; font-weight:500; color:var(--t3);
+  padding:5px 11px; border-radius:8px; transition:all .15s;
+}
+.nav-a:hover { color:var(--t1); background:var(--bg3) }
+.nav-pill {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 14px; border-radius:20px;
+  background:var(--a); color:#000;
+  font-size:12px; font-weight:700; letter-spacing:.01em;
+  transition: opacity .15s;
+}
+.nav-pill:hover { opacity:.85; color:#000 }
+@media(max-width:640px){
+  .nav-links .nav-a { display:none }
+  .nav { padding:0 20px }
+}
+
+/* ─── HERO ───────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  padding: 96px 32px 72px;
+  text-align: center;
+  overflow: hidden;
+}
+/* animated grid bg */
+.hero-grid {
+  position:absolute; inset:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(245,158,11,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245,158,11,.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 80% at 50% 0%, black 30%, transparent 80%);
+  animation: grid-drift 24s linear infinite;
+}
+@keyframes grid-drift { to { background-position: 48px 48px } }
+.hero-glow {
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -20%, rgba(245,158,11,.22) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 35% at 75% 85%, rgba(96,165,250,.09) 0%, transparent 55%);
+}
+.hero-inner {
+  position:relative;
+  max-width: 860px; margin:0 auto;
+}
+.hero-venue {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:4px 14px 4px 10px; border-radius:20px;
+  background: var(--a-dim); border:1px solid rgba(245,158,11,.28);
+  font-size:11.5px; font-weight:700; color:var(--a);
+  letter-spacing:.1em; text-transform:uppercase;
+  margin-bottom:30px;
+}
+.hero-venue-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--a);
+  animation: blink 2.4s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+.hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(40px, 6.5vw, 68px);
+  font-weight: 700;
+  color: var(--t1);
+  letter-spacing: -.04em;
+  line-height: 1.05;
+  margin-bottom: 26px;
+}
+.hero h1 em { font-style:italic; color: var(--a) }
+.hero-tagline {
+  font-size:18px; color:var(--t3);
+  max-width:580px; margin:0 auto 36px;
+  line-height:1.65;
+  font-weight:300;
+}
+.hero-pickaxe {
+  width:72px; height:72px;
+  object-fit:contain;
+  margin:0 auto 36px;
+  filter: drop-shadow(0 0 20px rgba(245,158,11,.5)) drop-shadow(0 0 60px rgba(245,158,11,.2));
+  animation: swing 5s ease-in-out infinite;
+  transform-origin: 70% 30%;
+}
+@keyframes swing {
+  0%,100% { transform: rotate(-8deg) translateY(0) }
+  50%      { transform: rotate( 8deg) translateY(-6px) }
+}
+.hero-authors {
+  font-size:15px; color:var(--t3);
+  line-height:2.1; margin-bottom:28px;
+}
+.hero-authors .name { color:var(--t2); font-weight:500 }
+.hero-authors sup { font-size:10px; color:var(--t4) }
+.hero-authors .eq { color:var(--a); font-size:10px }
+.hero-affils {
+  font-size:13px; color:var(--t4);
+  margin-top:4px; line-height:1.9;
+}
+.hero-affils sup { font-size:10px }
+.hero-btns {
+  display:flex; align-items:center; justify-content:center;
+  gap:10px; flex-wrap:wrap;
+}
+.btn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 22px; border-radius:24px;
+  font-family:var(--sans); font-size:13.5px; font-weight:600;
+  border:none; cursor:pointer; transition:all .18s;
+}
+.btn-primary { background:var(--a); color:#000 }
+.btn-primary:hover { background:var(--a2); color:#000 }
+.btn-ghost {
+  background:transparent;
+  border:1px solid var(--border2);
+  color:var(--t2);
+}
+.btn-ghost:hover { background:var(--bg3); color:var(--t1) }
+.btn-arxiv {
+  background:#b31b1b; color:#fff;
+  border:1px solid transparent;
+}
+.btn-arxiv:hover { background:#8f1313; color:#fff }
+.btn-github {
+  background:#24292f; color:#fff;
+  border:1px solid transparent;
+}
+.btn-github:hover { background:#444d56; color:#fff }
+
+/* ─── TLDR ───────────────────────────────────────────────── */
+.tldr-wrap {
+  background: linear-gradient(135deg, rgba(245,158,11,.09) 0%, rgba(96,165,250,.06) 100%);
+  border-top:1px solid rgba(245,158,11,.18);
+  border-bottom:1px solid rgba(96,165,250,.12);
+  padding: 36px 32px;
+}
+.tldr-inner {
+  max-width: var(--col);
+  margin:0 auto;
+  display:flex; gap:20px; align-items:flex-start;
+}
+.tldr-badge {
+  flex-shrink:0;
+  background:var(--a); color:#000;
+  font-size:10px; font-weight:800; letter-spacing:.12em;
+  text-transform:uppercase;
+  padding:4px 12px; border-radius:4px; margin-top:5px;
+}
+.tldr-text {
+  font-size:17px; color:var(--t1); line-height:1.75;
+}
+.tldr-text strong { color:var(--a) }
+@media(max-width:640px){ .tldr-inner{flex-direction:column;gap:12px} }
+
+/* ─── PAGE LAYOUT ────────────────────────────────────────── */
+.page {
+  max-width: calc(var(--col) + var(--toc-w) + 80px);
+  margin:0 auto;
+  padding:0 32px 120px;
+  display:grid;
+  grid-template-columns: var(--toc-w) 1fr;
+  gap:0 56px;
+  align-items:start;
+}
+@media(max-width:980px) {
+  .page { grid-template-columns:1fr; gap:0 }
+  .toc  { display:none }
+}
+@media(max-width:640px) { .page { padding:0 20px 80px } }
+
+/* ─── TOC ────────────────────────────────────────────────── */
+.toc {
+  position:sticky;
+  top:calc(var(--nav-h) + 28px);
+  padding:32px 0 0;
+  max-height:calc(100vh - var(--nav-h) - 56px);
+  overflow-y:auto;
+  opacity:0; transform:translateY(8px);
+  transition:opacity .4s ease, transform .4s ease;
+}
+.toc.ready { opacity:1; transform:translateY(0) }
+.toc-label {
+  font-size:10px; font-weight:700; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--t5);
+  margin-bottom:12px;
+}
+.toc a {
+  display:block;
+  font-size:12.5px; color:var(--t4);
+  padding:4px 0 4px 12px;
+  border-left:2px solid transparent;
+  transition:all .15s; line-height:1.4;
+}
+.toc a:hover { color:var(--t2) }
+.toc a.active { color:var(--t1); border-left-color:var(--a); font-weight:500 }
+.toc a.sub { padding-left:22px; font-size:12px }
+
+/* ─── ARTICLE ────────────────────────────────────────────── */
+.article {
+  min-width:0;
+  padding:56px 0 0;
+}
+.article section {
+  margin-bottom:80px;
+}
+.section-kicker {
+  font-size:10.5px; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--a);
+  margin-bottom:10px;
+}
+.article h2 {
+  font-family:var(--serif);
+  font-size:32px; font-weight:700;
+  color:var(--t1); letter-spacing:-.035em;
+  line-height:1.15; margin-bottom:22px;
+}
+.article h3 {
+  font-family:var(--serif);
+  font-size:21px; font-weight:600;
+  color:var(--t1); letter-spacing:-.02em;
+  margin:44px 0 13px;
+}
+.article p { margin-bottom:20px }
+.article p:last-child { margin-bottom:0 }
+.article strong { color:var(--t1); font-weight:600 }
+.article hr {
+  border:none;
+  height:1px;
+  background:linear-gradient(90deg, transparent, var(--border2), transparent);
+  margin:72px 0;
+}
+
+/* ─── PIPELINE FIGURE ────────────────────────────────────── */
+.figure {
+  margin:36px 0 40px;
+  border-radius:16px;
+  overflow:hidden;
+  border:1px solid var(--border2);
+  background:var(--bg1);
+}
+.figure-caption {
+  padding:14px 24px 18px;
+  font-size:13px; color:var(--t4); line-height:1.6;
+  border-top:1px solid var(--border);
+}
+.figure-caption strong { color:var(--t3) }
+.pipeline {
+  padding:28px 24px 20px;
+  font-family:var(--mono);
+}
+.pipeline-group { margin-bottom:24px }
+.pipeline-group:last-child { margin-bottom:0 }
+.pipeline-title {
+  font-size:10.5px; font-weight:500; letter-spacing:.09em;
+  text-transform:uppercase;
+  margin-bottom:12px;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+}
+.pipeline-title.std { color:var(--t4) }
+.pipeline-title.psd { color:var(--a) }
+.pipe-row {
+  display:flex; align-items:center;
+  gap:3px; margin-bottom:5px;
+}
+.pipe-label {
+  width:66px; flex-shrink:0;
+  font-size:11px; color:var(--t4);
+  text-align:right; padding-right:10px;
+}
+.pipe-track {
+  display:flex; align-items:center; gap:2px; flex:1;
+  overflow:hidden;
+}
+.pb {
+  height:30px; border-radius:5px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; font-weight:600; letter-spacing:.03em;
+  flex-shrink:0; white-space:nowrap;
+  transition: opacity .2s;
+}
+.pb-d { background:rgba(245,158,11,.82); color:#000 }
+.pb-v { background:rgba(96,165,250,.80);  color:#000 }
+.pb-c { background:rgba(52,211,153,.75); color:#000; font-size:9px }
+.pb-i { background:rgba(255,255,255,.05); color:var(--t5);
+        border:1px dashed rgba(255,255,255,.1); font-size:9px }
+.pb-gap { flex:1; min-width:6px }
+.pb-dots { color:var(--t4); font-size:15px; letter-spacing:3px; padding:0 4px; flex-shrink:0 }
+
+/* animated highlight for PSD overlap */
+.pipe-overlap-label {
+  font-size:10px; color:var(--g); letter-spacing:.04em;
+  text-align:center; margin-top:10px;
+  animation: fade-pulse 3s ease-in-out infinite;
+}
+@keyframes fade-pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+.pipeline-legend {
+  display:flex; gap:16px; flex-wrap:wrap;
+  padding:12px 24px;
+  border-top:1px solid var(--border);
+  background:var(--bg);
+}
+.leg { display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--t4) }
+.leg-sw { width:13px; height:13px; border-radius:3px; flex-shrink:0 }
+
+/* ─── ARCH CARDS ──────────────────────────────────────────── */
+.arch-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:12px; margin:28px 0;
+}
+@media(max-width:540px) { .arch-grid { grid-template-columns:1fr } }
+.arch-card {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:20px 18px;
+  transition:border-color .2s, transform .25s;
+}
+.arch-card:hover {
+  border-color:var(--border2);
+  transform:translateY(-2px);
+}
+.arch-card-head {
+  display:flex; align-items:center; gap:9px;
+  margin-bottom:10px;
+}
+.arch-card-icon {
+  width:32px; height:32px; border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; flex-shrink:0;
+}
+.ic-amber { background:var(--a-dim) }
+.ic-blue  { background:var(--b-dim) }
+.ic-green { background:var(--g-dim) }
+.arch-card-name {
+  font-size:14px; font-weight:700; color:var(--t1);
+}
+.arch-card p { font-size:13.5px; color:var(--t3); line-height:1.65; margin:0 }
+
+/* ─── THEOREM BOX ─────────────────────────────────────────── */
+.theorem {
+  position:relative;
+  background:linear-gradient(135deg, rgba(245,158,11,.08) 0%, rgba(96,165,250,.05) 100%);
+  border:1px solid rgba(245,158,11,.25);
+  border-radius:16px;
+  padding:32px 32px 32px 40px;
+  margin:36px 0;
+  overflow:hidden;
+}
+.theorem::before {
+  content:'';
+  position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:linear-gradient(180deg, var(--a), var(--b));
+}
+.theorem-label {
+  font-size:10px; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--a); margin-bottom:12px;
+}
+.theorem-body {
+  font-family:var(--serif); font-size:19px; font-weight:400;
+  font-style:italic;
+  color:var(--t1); line-height:1.6;
+}
+.theorem-body strong { color:var(--a); font-style:normal; font-weight:700 }
+.theorem-body sub, .theorem-body sup { font-size:11px }
+
+/* ─── STATS GRID ──────────────────────────────────────────── */
+.stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:32px 0 }
+@media(max-width:540px) { .stats { grid-template-columns:1fr 1fr } }
+.stat {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:16px; padding:24px 18px; text-align:center;
+  transition:border-color .2s, transform .22s;
+}
+.stat:hover { border-color:var(--border2); transform:translateY(-3px) }
+.stat-num {
+  font-family:var(--serif);
+  font-size:48px; font-weight:700; line-height:1;
+  margin-bottom:9px;
+}
+.c-a { color:var(--a) }
+.c-b { color:var(--b) }
+.c-g { color:var(--g) }
+.c-red { color:#ef4444 }
+.stat-desc { font-size:13px; color:var(--t3); line-height:1.45 }
+
+/* ─── BAR CHART ───────────────────────────────────────────── */
+.barchart { margin:28px 0 }
+.bar-row { margin-bottom:14px }
+.bar-label {
+  display:flex; justify-content:space-between;
+  font-size:13px; margin-bottom:5px;
+}
+.bar-name { color:var(--t2); font-weight:500 }
+.bar-val  { color:var(--t3); font-family:var(--mono); font-size:12px }
+.bar-track {
+  height:10px; border-radius:5px;
+  background:var(--bg3); overflow:hidden;
+}
+.bar-fill {
+  height:100%; border-radius:5px;
+  width:0%; transition:width 1.2s cubic-bezier(.23,1,.32,1);
+}
+.bar-fill.mine  { background:linear-gradient(90deg, var(--a), var(--a2)) }
+.bar-fill.pearl { background:var(--b-dim); border:1px solid rgba(96,165,250,.4) }
+.bar-fill.std   { background:var(--bg4) }
+
+/* ─── RESULTS TABLE ───────────────────────────────────────── */
+.rtable {
+  width:100%; border-collapse:collapse;
+  font-size:14px; margin:24px 0;
+}
+.rtable th {
+  padding:10px 14px;
+  font-size:10.5px; font-weight:700; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--t4);
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  text-align:left;
+}
+.rtable td {
+  padding:11px 14px; color:var(--t2);
+  border-bottom:1px solid var(--border);
+}
+.rtable tr:last-child td { border-bottom:none }
+.rtable tr:hover td { background:var(--bg2) }
+.good { color:var(--g); font-weight:600 }
+.mid  { color:var(--a); font-weight:600 }
+
+/* ─── CALLOUT ─────────────────────────────────────────────── */
+.callout {
+  background:var(--a-dim);
+  border-left:3px solid var(--a);
+  border-radius:0 12px 12px 0;
+  padding:20px 24px;
+  margin:32px 0;
+  font-family:var(--serif); font-size:19px; font-style:italic;
+  color:var(--t1); line-height:1.6;
+}
+.callout strong { font-style:normal; color:var(--a) }
+
+/* ─── TAKEAWAY ────────────────────────────────────────────── */
+.takeaway {
+  position:relative;
+  background:linear-gradient(135deg, var(--bg3) 0%, var(--bg2) 100%);
+  border:1px solid var(--border2);
+  border-radius:20px;
+  padding:40px;
+  margin:36px 0;
+  overflow:hidden;
+  text-align:center;
+}
+.takeaway::after {
+  content:'';
+  position:absolute; inset:0;
+  background:radial-gradient(ellipse 70% 70% at 50% 50%, rgba(245,158,11,.06) 0%, transparent 70%);
+  pointer-events:none;
+}
+.takeaway-icon { font-size:36px; margin-bottom:16px; line-height:1 }
+.takeaway-text {
+  font-family:var(--serif);
+  font-size:22px; font-weight:600; font-style:italic;
+  color:var(--t1); line-height:1.5;
+  position:relative; z-index:1;
+}
+.takeaway-text strong { color:var(--a); font-style:normal }
+
+/* ─── LIMITATION CARDS ────────────────────────────────────── */
+.lim-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:24px 0 }
+@media(max-width:540px) { .lim-grid { grid-template-columns:1fr } }
+.lim-card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:12px; padding:18px 16px;
+}
+.lim-title {
+  font-size:14px; font-weight:700; color:var(--t1);
+  margin-bottom:8px; display:flex; align-items:center; gap:7px;
+}
+.lim-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:rgba(251,146,60,.7); flex-shrink:0;
+}
+.lim-card p { font-size:13.5px; color:var(--t3); margin:0; line-height:1.65 }
+
+/* ─── CODE BLOCK ──────────────────────────────────────────── */
+.codeblock {
+  background:#070a12;
+  border:1px solid var(--border2);
+  border-radius:14px; overflow:hidden; margin:24px 0;
+}
+.codeblock-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 18px;
+  background:rgba(255,255,255,.025);
+  border-bottom:1px solid var(--border);
+}
+.codeblock-lang {
+  font-family:var(--mono); font-size:11px;
+  color:var(--a); letter-spacing:.06em; font-weight:500;
+}
+.codeblock-copy {
+  background:none; border:none;
+  font-family:var(--sans); font-size:11px;
+  color:var(--t4); cursor:pointer;
+  padding:3px 10px; border-radius:5px; transition:all .15s;
+}
+.codeblock-copy:hover { background:var(--bg3); color:var(--t2) }
+.codeblock pre {
+  padding:20px 22px; overflow-x:auto;
+  font-family:var(--mono); font-size:13px;
+  line-height:1.8; color:#8896aa;
+}
+.bib-type  { color:#e879f9 }
+.bib-key   { color:var(--a) }
+.bib-field { color:var(--b) }
+.bib-val   { color:#86efac }
+.bib-brace { color:var(--t4) }
+
+/* ─── FOOTER ──────────────────────────────────────────────── */
+footer {
+  background:var(--bg1);
+  border-top:1px solid var(--border);
+  padding:56px 32px;
+  text-align:center;
+}
+.footer-logo {
+  font-family:var(--serif);
+  font-size:22px; font-weight:700; color:var(--t1);
+  margin-bottom:10px;
+}
+.footer-logo em { color:var(--a); font-style:normal }
+.footer-sub {
+  font-size:14px; color:var(--t4); line-height:1.7; margin-bottom:24px;
+}
+.footer-links {
+  display:flex; gap:20px; justify-content:center; flex-wrap:wrap;
+}
+.footer-links a { font-size:13px; color:var(--t4) }
+.footer-links a:hover { color:var(--a) }
+.footer-links .btn-arxiv,.footer-links .btn-arxiv:hover { color:#fff }
+.footer-links .btn-github,.footer-links .btn-github:hover { color:#fff }
+.footer-credit {
+  margin-top:24px; font-size:12px; color:var(--t5); line-height:1.6;
+}
+
+/* ─── FADE-IN ─────────────────────────────────────────────── */
+.reveal {
+  opacity:0; transform:translateY(20px);
+  transition:opacity .7s ease, transform .7s ease;
+}
+.reveal.on { opacity:1; transform:translateY(0) }
+
+/* ─── INLINE UTILS ────────────────────────────────────────── */
+.hi { color:var(--a); font-weight:600 }
+.hi-b { color:var(--b); font-weight:600 }
+.tag {
+  display:inline-block;
+  font-family:var(--mono); font-size:12.5px;
+  background:var(--bg3); color:var(--b);
+  padding:1px 8px; border-radius:5px;
+  border:1px solid var(--border);
+}
+
+/* ─── THEME TOGGLE ───────────────────────────────────────── */
+#theme-toggle {
+  position: fixed; bottom: 28px; right: 28px; z-index: 999;
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: var(--bg2);
+  color: var(--t1);
+  font-size: 20px; line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,.25);
+  transition: background .2s, border-color .2s, transform .15s;
+}
+#theme-toggle:hover { transform: scale(1.1); background: var(--bg3) }
+
+/* ─── READING PROGRESS ───────────────────────────────────────── */
+#read-progress {
+  position:fixed; top:0; left:0; z-index:300;
+  height:2px; width:0%; pointer-events:none;
+  background:linear-gradient(90deg, var(--a) 0%, var(--a2) 55%, var(--b) 100%);
+  transition:width .08s linear;
+}
+
+/* ─── SCROLL HINT ─────────────────────────────────────────────── */
+.hero-scroll {
+  position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  opacity:0; animation:scroll-fade-in 1s ease 1.2s forwards;
+}
+@keyframes scroll-fade-in { to { opacity:.45 } }
+.hero-scroll-line {
+  width:1px; height:40px;
+  background:linear-gradient(180deg, var(--a), transparent);
+  animation:scroll-line 2s ease-in-out infinite;
+}
+@keyframes scroll-line {
+  0%,100% { transform:scaleY(1); opacity:.6 }
+  50%      { transform:scaleY(.6); opacity:.25 }
+}
+.hero-scroll-text {
+  font-size:10px; font-weight:600; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--t5);
+}
+</style>
+</head>
+<body>
+<div id="read-progress"></div>
+<button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">☀️</button>
+
+<!-- ══════════════════════════════════════════════════════════
+     NAV
+════════════════════════════════════════════════════════════ -->
+
+<!-- ══════════════════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════════════════ -->
+<header class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+
+    <img class="hero-pickaxe" src="pickaxe.PNG" alt="">
+
+    <h1><em>MineDraft</em>: A Framework for<br>Batch Parallel Speculative Decoding</h1>
+
+    <p class="hero-tagline">
+      What if your draft model never blocked the verifier? MineDraft overlaps drafting and verification across parallel batches — hiding latency that standard speculative decoding leaves on the table.
+    </p>
+
+    <div class="hero-authors">
+      <div>
+        <span class="name">Zhenwei Tang</span><sup class="eq">1*</sup>&ensp;
+        <span class="name">Arun Verma</span><sup class="eq">2*</sup>&ensp;
+        <span class="name">Zijian Zhou</span><sup>2,3</sup>&ensp;
+        <span class="name">Zhaoxuan Wu</span><sup>2</sup>&ensp;
+        <span class="name">Alok Prakash</span><sup>2</sup>
+        <span class="name">Daniela Rus</span><sup>4,2</sup>&ensp;
+        <span class="name">Bryan Kian Hsiang Low</span><sup>3,2</sup>
+      </div>
+      <div class="hero-affils">
+        <sup>1</sup> Nanyang Technological University &middot;
+        <sup>2</sup> Singapore-MIT Alliance for Research and Technology Centre &middot;
+        <sup>3</sup> National University of Singapore &middot;
+        <sup>4</sup> MIT CSAIL
+        &ensp;<span style="color:var(--t5)">(*Equal contribution)</span>
+      </div>
+
+    </div>
+
+    <div class="hero-btns">
+      <a class="btn btn-arxiv" href="https://arxiv.org/pdf/2603.18016v1" target="_blank">
+        <svg width="11" height="15" viewBox="0 0 74.492 100.25" fill="currentColor" aria-label="arXiv"><g transform="translate(-526.086 -245.559)"><path d="M586.72,255.616a3.377,3.377,0,0,1,.448.031,5.917,5.917,0,0,1,3.581,2.79c.454,1.116.314,2.023-1.315,4.141L563.168,293.6l-8.558-10.047,29.348-26.616a4.406,4.406,0,0,1,2.762-1.321m0-1.5a5.766,5.766,0,0,0-3.69,1.643l-.041.032-.038.035L553.6,282.442l-1.077.977.943,1.107,8.558,10.047,1.145,1.344,1.141-1.348,26.267-31.022.022-.027.022-.028c1.574-2.046,2.327-3.622,1.516-5.619a7.309,7.309,0,0,0-4.779-3.714,5.083,5.083,0,0,0-.64-.043Z"/><path d="M553.423,284.593l8.977,10.558L597.911,337.9c.873,1.093,1.419,2.186,1.047,3.418a4.092,4.092,0,0,1-2.721,2.837,3.557,3.557,0,0,1-1.045.159,4,4,0,0,1-2.687-1.124L548.01,300.808c-3.5-3.5-2.971-8.151.436-11.558l4.977-4.657m.124-2.17L552.4,283.5l-4.976,4.656c-4.192,4.191-4.372,9.816-.473,13.714l44.521,42.4a5.485,5.485,0,0,0,3.722,1.538,5.1,5.1,0,0,0,1.483-.224,5.59,5.59,0,0,0,3.719-3.838,5.176,5.176,0,0,0-1.31-4.788l-35.53-42.767-8.988-10.571-1.019-1.2Z"/><path d="M562.4,295.151l9.556,11.5,5.761-5.356a7.926,7.926,0,0,0,.041-11.743l-43.7-41.923s-1.671-2.029-3.437-2.071a4.49,4.49,0,0,0-4.23,2.718c-.688,1.651-.194,2.809,1.315,4.97l29.306,35.565Z"/><path d="M553.7,306.223l-17.116,21.024c-1.255,1.337-2.032,3.683-1.331,5.367a4.587,4.587,0,0,0,4.287,2.841,4.087,4.087,0,0,0,3.082-1.523l20.328-18.9Z"/></g></svg>
+        arXiv
+      </a>
+      <a class="btn btn-github" href="https://github.com/electron-shaders/MineDraft" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════
+     TL;DR
+════════════════════════════════════════════════════════════ -->
+<div class="tldr-wrap">
+  <div class="tldr-inner">
+    <span class="tldr-badge">TL;DR</span>
+    <p class="tldr-text">
+      MineDraft introduces <strong>Batch Parallel Speculative Decoding</strong> — running the draft model on a dedicated GPU one step ahead so its latency is hidden inside the verifier's computation time. The result: <strong>up to 75% more throughput</strong> and <strong>39% lower end-to-end latency</strong> over standard speculative decoding, with just one extra GPU.
+    </p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TWO-COL: TOC + ARTICLE
+════════════════════════════════════════════════════════════ -->
+<div class="page">
+
+  <!-- TOC -->
+  <aside class="toc" id="toc">
+    <div class="toc-label">On this page</div>
+    <a href="#overview">The Problem</a>
+    <a href="#method">Method</a>
+    <a href="#pipeline" class="sub">Pipeline Design</a>
+    <a href="#components" class="sub">Components</a>
+    <a href="#theory" class="sub">Theory</a>
+    <a href="#results">Results</a>
+    <a href="#throughput" class="sub">Throughput</a>
+    <a href="#latency" class="sub">Latency</a>
+    <a href="#takeaway">Key Takeaway</a>
+    <a href="#limitations">Limitations</a>
+    <a href="#citation">Citation</a>
+  </aside>
+
+  <!-- ARTICLE -->
+  <article class="article">
+
+    <!-- ── OVERVIEW ─────────────────────────────────────── -->
+    <section id="overview" class="reveal">
+      <div class="section-kicker">The Problem</div>
+      <h2>The Hidden Tax of Sequential Drafting</h2>
+
+      <p>Speculative decoding is one of the cleverest tricks in modern LLM inference. A small, fast draft model races ahead to propose several tokens; the large target model verifies them all in one parallel forward pass. When draft quality is high, you get multiple tokens for the cost of a single verification step — a genuine free lunch.</p>
+
+      <p>But there is a subtle, rarely-examined inefficiency at the heart of every standard speculative decoding system: <strong>drafting and verification happen one after the other</strong>. The draft model generates its proposals. It finishes. Only then does the target model begin to verify. Those drafting milliseconds sit directly on the critical path — not hidden, not amortized, not free. Every cycle the draft model runs is a cycle the massive target model sits completely idle.</p>
+
+      <div class="callout">
+        In standard speculative decoding, <strong>frequent rejections can make SD slower than ordinary autoregressive generation</strong> — because you've paid for drafting and gained nothing.
+      </div>
+
+      <p>The severity of this problem compounds in production batch-serving settings. With tens of concurrent requests, the draft model must generate proposals for every active request at each step. The target model's entire forward pass waits. And because performance is acutely sensitive to acceptance rates, any degradation in draft quality can flip the system from faster to slower than if you'd never used speculative decoding at all.</p>
+
+      <p>Prior work addressed this by improving <em>draft quality</em> — better draft models (EAGLE, EAGLE-2), smarter token selection (TETRIS), tree-based speculation. MineDraft takes a fundamentally different angle: rather than making individual draft tokens more likely to be accepted, it asks <em>what if we could run drafting and verification at the same time?</em></p>
+
+      <p>The name is a deliberate nod to the Minecraft game engine, which loads the next world chunk into memory while the player is still navigating the current one — so the world appears seamless. MineDraft applies exactly this background-loading principle to LLM inference, ensuring the draft model is always one step ahead and its compute time never appears on the critical path.</p>
+    </section>
+
+    <hr>
+
+    <!-- ── METHOD ──────────────────────────────────────── -->
+    <section id="method" class="reveal">
+      <div class="section-kicker">Method</div>
+      <h2>Batch Parallelism: Always One Step Ahead</h2>
+
+      <p>The core mechanism is elegant. A standard system processes <em>m</em> requests per step. MineDraft maintains <em>2m</em> requests split into two alternating batches. At any given moment, the <strong>target model is verifying Batch A</strong> while the <strong>draft model is speculating ahead for Batch B</strong>. At the next step, they swap roles. The draft model is never idle waiting for verification to finish — it is always working on the other batch.</p>
+
+      <!-- PIPELINE FIGURE -->
+      <div id="pipeline" class="figure reveal" style="margin-top:32px">
+        <div class="pipeline">
+
+          <div class="pipeline-group">
+            <div class="pipeline-title std">Standard Speculative Decoding — Sequential</div>
+            <div class="pipe-row">
+              <div class="pipe-label">Process 1</div>
+              <div class="pipe-track">
+                <div class="pb pb-d" style="width:72px">Draft</div>
+                <div class="pb pb-c" style="width:22px;font-size:8px">→</div>
+                <div class="pb pb-v" style="width:100px">Verify</div>
+                <div class="pb pb-d" style="width:72px">Draft</div>
+                <div class="pb pb-c" style="width:22px;font-size:8px">→</div>
+                <div class="pb pb-v" style="width:100px">Verify</div>
+                <div class="pb pb-d" style="width:72px">Draft</div>
+                <div class="pb pb-dots">···</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--t5);margin-left:76px;margin-top:4px">⟵ Draft on critical path. Verifier idles during every drafting phase. ⟶</div>
+          </div>
+
+          <div class="pipeline-group" style="margin-top:28px">
+            <div class="pipeline-title psd">MineDraft — Batch Parallel Speculative Decoding</div>
+            <div class="pipe-row">
+              <div class="pipe-label" style="color:var(--a)">Drafter</div>
+              <div class="pipe-track">
+                <div class="pb pb-d" style="width:82px">Batch 0</div>
+                <div class="pb pb-c" style="width:16px;font-size:8px">↓</div>
+                <div class="pb pb-d" style="width:82px">Batch 1</div>
+                <div class="pb pb-c" style="width:16px;font-size:8px">↓</div>
+                <div class="pb pb-d" style="width:82px">Batch 0</div>
+                <div class="pb pb-c" style="width:16px;font-size:8px">↓</div>
+                <div class="pb pb-d" style="width:82px">Batch 1</div>
+                <div class="pb pb-dots">···</div>
+              </div>
+            </div>
+            <div class="pipe-row" style="margin-top:4px">
+              <div class="pipe-label" style="color:var(--b)">Verifier</div>
+              <div class="pipe-track">
+                <div class="pb pb-i" style="width:82px">init</div>
+                <div class="pb pb-c" style="width:16px;font-size:8px;opacity:.5">·</div>
+                <div class="pb pb-v" style="width:82px">Batch 0</div>
+                <div class="pb pb-c" style="width:16px;font-size:8px;opacity:.5">·</div>
+                <div class="pb pb-v" style="width:82px">Batch 1</div>
+                <div class="pb pb-c" style="width:16px;font-size:8px;opacity:.5">·</div>
+                <div class="pb pb-v" style="width:82px">Batch 0</div>
+                <div class="pb pb-dots">···</div>
+              </div>
+            </div>
+            <div class="pipe-overlap-label">✦ Drafting and verification fully overlap — drafting latency disappears ✦</div>
+          </div>
+
+        </div>
+        <div class="pipeline-legend">
+          <div class="leg"><div class="leg-sw" style="background:rgba(245,158,11,.82)"></div> Drafting</div>
+          <div class="leg"><div class="leg-sw" style="background:rgba(96,165,250,.80)"></div> Verification</div>
+          <div class="leg"><div class="leg-sw" style="background:rgba(52,211,153,.75)"></div> GPU-to-GPU sync</div>
+          <div class="leg"><div class="leg-sw" style="background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.15)"></div> Idle / init</div>
+        </div>
+        <div class="figure-caption">
+          <strong>Figure 1.</strong> MineDraft parallelizes drafting and verification by maintaining two alternating batches. The Drafter (running on a dedicated GPU) is always one step ahead, so its compute time is hidden inside the Verifier's forward pass. The one-step init cost is negligible over long request sequences.
+        </div>
+      </div>
+
+      <!-- COMPONENTS -->
+      <h3 id="components">Four Interacting Components</h3>
+      <p>MineDraft decomposes into four precisely-specified subsystems that work together to realize Batch Parallelism without architectural surgery to the underlying LLM stack:</p>
+
+      <div class="arch-grid reveal">
+        <div class="arch-card">
+          <div class="arch-card-head">
+            <div class="arch-card-icon ic-amber">⚙</div>
+            <div class="arch-card-name">Batch Manager</div>
+          </div>
+          <p>Assigns each incoming request to Batch 0 or Batch 1 using a <span class="tag">balance</span> counter that tracks size difference. Recycles batch IDs on completion or preemption. Tracks <span class="tag">skip_batch</span> — the current draft batch awaiting its first verification.</p>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-head">
+            <div class="arch-card-icon ic-blue">📋</div>
+            <div class="arch-card-name">Scheduler</div>
+          </div>
+          <p>Manages the full request lifecycle: Waiting → Running → Finished. Patches vLLM's KV-block allocator so the draft batch doesn't wastefully pre-allocate GPU memory for tokens that aren't being verified yet.</p>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-head">
+            <div class="arch-card-icon ic-amber">✍</div>
+            <div class="arch-card-name">Drafter</div>
+          </div>
+          <p>Runs the small draft model on a <strong>dedicated separate GPU</strong>. Generates <em>k</em> speculative tokens for the draft batch while the Verifier processes the target batch. Communicates via direct GPU-to-GPU transfer — no CPU round-trip.</p>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-head">
+            <div class="arch-card-icon ic-green">✔</div>
+            <div class="arch-card-name">Verifier</div>
+          </div>
+          <p>Runs the large target model on the primary GPU cluster. Receives draft tokens from the Drafter, evaluates them in one forward pass, and returns accepted tokens plus target-sampled continuations back to the Drafter.</p>
+        </div>
+      </div>
+
+      <p>Each SD step ends at a <em>sync point</em> — the moment the Drafter returns output to the Scheduler. At this point, the batches alternate roles: the old target batch becomes the new draft batch, and vice versa. This alternation requires no centralized orchestration beyond the Batch Manager's lightweight bookkeeping.</p>
+
+      <!-- THEORY -->
+      <h3 id="theory">Theoretical Efficiency Guarantee</h3>
+      <p>MineDraft doesn't just work empirically — it is provably faster. Under mild assumptions about the draft model's acceptance function <em>f(t) = 1 − e<sup>−αt</sup></em> (the standard exponential model used throughout the speculative decoding literature), the authors prove:</p>
+
+      <div class="theorem reveal">
+        <div class="theorem-label">Theorem 1 — Formal Guarantee</div>
+        <div class="theorem-body">
+          For αV ≥ −W<sub>−1</sub>(−1/2e) − 1 ≈ 1.68, standard SD satisfies
+          T<sub>SD</sub> &gt; <strong>1.59 · T<sub>PSD</sub></strong> — meaning MineDraft's Parallel SD is
+          at least <strong>37% faster</strong> than standard SD, with improvement growing with draft quality.
+        </div>
+      </div>
+
+      <p>The product αV captures both draft quality (α, the acceptance sharpness parameter) and verification cost (V). When either the verifier is slower or the draft model is more accurate, the advantage of parallelism grows. This explains why MineDraft pairs especially powerfully with strong drafting strategies: better acceptance rates don't just improve token throughput — they amplify the parallel speedup.</p>
+    </section>
+
+    <hr>
+
+    <!-- ── RESULTS ──────────────────────────────────────── -->
+    <section id="results" class="reveal">
+      <div class="section-kicker">Results</div>
+      <h2>Consistent Gains Across Every Setting</h2>
+
+      <p>MineDraft was evaluated across seven target–draft model pairings, four benchmark datasets (Arena, ShareGPT, Spec-Bench, LLM-Tough-Questions), and extensive ablations. The conclusion is unambiguous: MineDraft outperforms standard SD and all prior parallelism baselines in every configuration without exception.</p>
+
+      <!-- STATS -->
+      <div class="stats reveal">
+        <div class="stat" style="background:linear-gradient(135deg,rgba(52,211,153,.18),rgba(52,211,153,.07));border-color:rgba(52,211,153,.35)">
+          <div class="stat-num c-g" data-target="75">0</div>
+          <div class="stat-desc">Max throughput gain over standard SD (tokens/sec)</div>
+        </div>
+        <div class="stat" style="background:linear-gradient(135deg,rgba(52,211,153,.18),rgba(52,211,153,.07));border-color:rgba(52,211,153,.35)">
+          <div class="stat-num c-g" data-target="39">0</div>
+          <div class="stat-desc">Max end-to-end latency reduction vs standard SD</div>
+        </div>
+        <div class="stat" style="background:linear-gradient(135deg,rgba(239,68,68,.18),rgba(239,68,68,.07));border-color:rgba(239,68,68,.35)">
+          <div class="stat-num c-red" data-target="1">0</div>
+          <div class="stat-desc">Extra GPU required (dedicated to the draft model)</div>
+        </div>
+      </div>
+
+      <!-- THROUGHPUT BARS -->
+      <h3 id="throughput">Throughput: Qwen3-32B + 1.7B Draft, Arena</h3>
+      <p>Representative throughput numbers at 2 speculative tokens per step on the Arena dataset. MineDraft (extra=1) adds one additional concurrent sequence per batch on top of the base configuration.</p>
+
+      <div class="barchart reveal" id="bars">
+        <div class="bar-row">
+          <div class="bar-label">
+            <span class="bar-name">MineDraft (extra=1)</span>
+            <span class="bar-val">~ 570 tok/s</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill mine" data-width="92"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">
+            <span class="bar-name">MineDraft (standalone)</span>
+            <span class="bar-val">~ 520 tok/s</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill mine" data-width="84" style="opacity:.75"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">
+            <span class="bar-name">PEARL + TETRIS (extra=1)</span>
+            <span class="bar-val">~ 430 tok/s</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill pearl" data-width="69" style="background:var(--b-dim);border:1px solid rgba(96,165,250,.35)"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">
+            <span class="bar-name">PEARL</span>
+            <span class="bar-val">~ 390 tok/s</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill pearl" data-width="63" style="background:var(--b-dim);border:1px solid rgba(96,165,250,.35)"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">
+            <span class="bar-name">Standard SD</span>
+            <span class="bar-val">~ 310 tok/s</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill std" data-width="50"></div></div>
+        </div>
+      </div>
+
+      <h3>Cross-Model Summary</h3>
+
+      <table class="rtable reveal">
+        <thead>
+          <tr>
+            <th>Target Model</th>
+            <th>Draft Model</th>
+            <th>Avg TP Gain ↑</th>
+            <th>Max Gain vs SD ↑</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Qwen3-32B</td>
+            <td>Qwen3-0.6B</td>
+            <td class="mid">38–47%</td>
+            <td class="good">70.3%</td>
+          </tr>
+          <tr>
+            <td>Qwen3-32B</td>
+            <td>Qwen3-1.7B</td>
+            <td class="mid">39–48%</td>
+            <td class="good">75.7%</td>
+          </tr>
+          <tr>
+            <td>Qwen3-32B</td>
+            <td>Qwen3-4B</td>
+            <td class="mid">50–65%</td>
+            <td class="good">75.1%</td>
+          </tr>
+          <tr>
+            <td>Qwen3-32B</td>
+            <td>Qwen3-8B</td>
+            <td class="mid">—</td>
+            <td class="good">OOM for baseline</td>
+          </tr>
+          <tr>
+            <td>Llama-3.3-70B</td>
+            <td>Llama-3.1-8B</td>
+            <td class="mid">22–31%</td>
+            <td class="good">37.1%</td>
+          </tr>
+          <tr>
+            <td>Vicuna-33B + EAGLE</td>
+            <td>EAGLE-Vicuna-33B</td>
+            <td class="mid">4–8%</td>
+            <td class="good">22.1%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="latency">End-to-End Latency</h3>
+      <p>Throughput and latency tell different stories. MineDraft excels at both. In the Qwen3-32B + 1.7B setting, it achieves an average E2E latency improvement of <span class="hi">24.6%</span> over the best baseline, with a maximum reduction of <span class="hi">39.5%</span> compared to standard SD. For Qwen3-32B + 4B, maximum reductions reach <span class="hi">38.9%</span>.</p>
+
+      <p>An important secondary finding: by placing the draft model on a dedicated GPU, MineDraft eliminates the VRAM contention that afflicts standard SD with large draft models. In Setting 4 (Qwen3-32B with Qwen3-8B as draft), standard SD fails entirely with an out-of-memory error. MineDraft continues operating at 250–560 tokens/sec.</p>
+
+      <p>MineDraft also composes cleanly with existing drafting strategies. When integrated with TETRIS, it outperforms standalone TETRIS; paired with EAGLE, it outperforms standalone EAGLE. This orthogonality is load-bearing: any improvement to draft acceptance rates directly amplifies the parallel speedup.</p>
+    </section>
+
+    <hr>
+
+    <!-- ── TAKEAWAY ─────────────────────────────────────── -->
+    <section id="takeaway" class="reveal">
+      <div class="section-kicker">Key Insight</div>
+      <h2>One Thing to Remember</h2>
+
+      <div class="takeaway reveal">
+        <div class="takeaway-icon"><img src="pickaxe.PNG" alt="pickaxe" style="height:1em;vertical-align:middle;display:inline"></div>
+        <div class="takeaway-text">
+          Standard speculative decoding puts the draft model <strong>on</strong> the critical path.
+          MineDraft takes it <strong>off</strong>. By running the drafter one batch ahead on its own GPU, drafting latency becomes a sunk cost hidden inside verification — yielding a speedup that is guaranteed by theory and confirmed across every model family tested.
+        </div>
+      </div>
+
+      <p>For ML engineers deploying LLM inference at scale: if you are already running speculative decoding and can spare one GPU, MineDraft is a plug-in upgrade. It composes with whatever drafting strategy you already use, and the theoretical guarantee means you benefit even when draft quality is mediocre. The larger and slower your verifier, the more drafting latency gets hidden — which means MineDraft's advantage is strongest precisely where you need it most.</p>
+    </section>
+
+    <hr>
+
+    <!-- ── LIMITATIONS ──────────────────────────────────── -->
+    <section id="limitations" class="reveal">
+      <div class="section-kicker">Limitations &amp; Future Work</div>
+      <h2>Known Trade-offs</h2>
+
+      <p>There are two structural limitations of the Batch Parallelism design:</p>
+
+      <div class="lim-grid reveal">
+        <div class="lim-card">
+          <div class="lim-title">
+            <div class="lim-dot"></div>
+            Irrecoverable Batch Imbalance
+          </div>
+          <p>When a request is terminated via user abort or preemption, new replacements are assigned to the draft batch — the only batch that can accept new requests. This can permanently skew batch sizes, degrading the load-balancing that Batch Parallelism relies on. Chunked prefill further exacerbates this. A future version of MineDraft will apply the full <span class="tag">balance</span>-tracking logic to all subsequent steps rather than switching to a simpler policy post-initialization.</p>
+        </div>
+        <div class="lim-card">
+          <div class="lim-title">
+            <div class="lim-dot"></div>
+            Batch Exhaustion Tail Effect
+          </div>
+          <p>When one batch empties (all requests finish) and the other has no ready draft tokens, the system falls back to standard sequential SD. This tail effect limits the theoretical ceiling below 50% total speedup. A proposed mitigation draws from PEARL: instruct the Drafter to generate tokens for the remaining batch's in-flight requests, re-drafting on failure, to partially overlap even the final steps of a request batch.</p>
+        </div>
+      </div>
+
+      <p>Future work will also explore: extending MineDraft to the vLLM v1 engine and its chunked prefill mode; eliminating the dedicated GPU requirement using weight-padding techniques (enabling the draft and target models to share GPU memory); and studying whether Batch Parallelism can be combined with tree-attention drafting for compounding gains.</p>
+    </section>
+
+    <hr>
+
+    <!-- ── CITATION ─────────────────────────────────────── -->
+    <section id="citation" class="reveal">
+      <div class="section-kicker">Citation</div>
+      <h2>Cite this Work</h2>
+
+      <div class="codeblock">
+        <div class="codeblock-head">
+          <span class="codeblock-lang">BibTeX</span>
+          <button class="codeblock-copy" onclick="copyBib(this)">Copy</button>
+        </div>
+        <pre><span class="bib-type">@misc</span><span class="bib-brace">{</span><span class="bib-key">tang2026minedraft</span><span class="bib-brace">,</span>
+  <span class="bib-field">title</span>         <span class="bib-brace">= {</span><span class="bib-val">MineDraft: A Framework for Batch Parallel Speculative Decoding</span><span class="bib-brace">},</span>
+  <span class="bib-field">author</span>        <span class="bib-brace">= {</span><span class="bib-val">Tang, Zhenwei and Verma, Arun and Zhou, Zijian and
+                  Wu, Zhaoxuan and Prakash, Alok and
+                  Rus, Daniela and Low, Bryan Kian Hsiang</span><span class="bib-brace">},</span>
+  <span class="bib-field">journal</span>       <span class="bib-brace">= {</span><span class="bib-val">arXiv preprint arXiv:2603.18016</span><span class="bib-brace">},</span>
+  <span class="bib-field">year</span>          <span class="bib-brace">= {</span><span class="bib-val">2026</span><span class="bib-brace">},</span>
+  <span class="bib-brace">}</span></pre>
+      </div>
+    </section>
+
+  </article><!-- /article -->
+</div><!-- /page -->
+
+<!-- ══════════════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-logo">
+    <img src="pickaxe.PNG" alt="" style="height:.9em;vertical-align:middle;display:inline;margin-right:.2em;margin-bottom:.1em">
+    <em>MineDraft:</em> A Framework for Batch Parallel Speculative Decoding
+  </div>
+  </div>
+  <div class="footer-links">
+    <a class="btn btn-arxiv" href="https://arxiv.org/pdf/2603.18016v1" target="_blank">
+      <svg width="11" height="15" viewBox="0 0 74.492 100.25" fill="currentColor" aria-label="arXiv"><g transform="translate(-526.086 -245.559)"><path d="M586.72,255.616a3.377,3.377,0,0,1,.448.031,5.917,5.917,0,0,1,3.581,2.79c.454,1.116.314,2.023-1.315,4.141L563.168,293.6l-8.558-10.047,29.348-26.616a4.406,4.406,0,0,1,2.762-1.321m0-1.5a5.766,5.766,0,0,0-3.69,1.643l-.041.032-.038.035L553.6,282.442l-1.077.977.943,1.107,8.558,10.047,1.145,1.344,1.141-1.348,26.267-31.022.022-.027.022-.028c1.574-2.046,2.327-3.622,1.516-5.619a7.309,7.309,0,0,0-4.779-3.714,5.083,5.083,0,0,0-.64-.043Z"/><path d="M553.423,284.593l8.977,10.558L597.911,337.9c.873,1.093,1.419,2.186,1.047,3.418a4.092,4.092,0,0,1-2.721,2.837,3.557,3.557,0,0,1-1.045.159,4,4,0,0,1-2.687-1.124L548.01,300.808c-3.5-3.5-2.971-8.151.436-11.558l4.977-4.657m.124-2.17L552.4,283.5l-4.976,4.656c-4.192,4.191-4.372,9.816-.473,13.714l44.521,42.4a5.485,5.485,0,0,0,3.722,1.538,5.1,5.1,0,0,0,1.483-.224,5.59,5.59,0,0,0,3.719-3.838,5.176,5.176,0,0,0-1.31-4.788l-35.53-42.767-8.988-10.571-1.019-1.2Z"/><path d="M562.4,295.151l9.556,11.5,5.761-5.356a7.926,7.926,0,0,0,.041-11.743l-43.7-41.923s-1.671-2.029-3.437-2.071a4.49,4.49,0,0,0-4.23,2.718c-.688,1.651-.194,2.809,1.315,4.97l29.306,35.565Z"/><path d="M553.7,306.223l-17.116,21.024c-1.255,1.337-2.032,3.683-1.331,5.367a4.587,4.587,0,0,0,4.287,2.841,4.087,4.087,0,0,0,3.082-1.523l20.328-18.9Z"/></g></svg>
+      arXiv
+    </a>
+    <a class="btn btn-github" href="https://github.com/electron-shaders/MineDraft" target="_blank">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+    <a class="btn btn-ghost" href="#overview">↑ Back to top</a>
+  </div>
+</footer>
+
+<script>
+/* ── Reveal on scroll ── */
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('on'); revealObs.unobserve(e.target) }
+  })
+}, { threshold: 0.06, rootMargin: '0px 0px -48px 0px' })
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el))
+
+/* ── TOC show + active ── */
+const toc = document.getElementById('toc')
+setTimeout(() => toc && toc.classList.add('ready'), 400)
+
+const tocLinks = document.querySelectorAll('.toc a')
+const sections = document.querySelectorAll('section[id], h3[id], div[id]')
+const tocObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocLinks.forEach(l => l.classList.remove('active'))
+      const a = document.querySelector(`.toc a[href="#${e.target.id}"]`)
+      if (a) a.classList.add('active')
+    }
+  })
+}, { rootMargin: '-15% 0px -70% 0px' })
+sections.forEach(s => tocObs.observe(s))
+
+/* ── Count-up numbers ── */
+const countObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return
+    const el = e.target
+    const target = +el.dataset.target
+    const suffix = el.dataset.target === '1' ? '' : '%'
+    let start = null
+    const dur = 1400
+    const step = ts => {
+      if (!start) start = ts
+      const p = Math.min((ts - start) / dur, 1)
+      const ease = 1 - Math.pow(1 - p, 3)
+      el.textContent = Math.round(ease * target) + suffix
+      if (p < 1) requestAnimationFrame(step)
+    }
+    requestAnimationFrame(step)
+    countObs.unobserve(el)
+  })
+}, { threshold: 0.5 })
+document.querySelectorAll('[data-target]').forEach(el => {
+  el.textContent = '0'
+  countObs.observe(el)
+})
+
+/* ── Animate bars ── */
+const barObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return
+    e.target.querySelectorAll('.bar-fill[data-width]').forEach((bar, i) => {
+      setTimeout(() => { bar.style.width = bar.dataset.width + '%' }, i * 120)
+    })
+    barObs.unobserve(e.target)
+  })
+}, { threshold: 0.3 })
+const barSection = document.getElementById('bars')
+if (barSection) barObs.observe(barSection)
+
+/* ── Copy BibTeX ── */
+function copyBib(btn) {
+  const txt = btn.closest('.codeblock').querySelector('pre').innerText
+  navigator.clipboard.writeText(txt).then(() => {
+    btn.textContent = 'Copied!'
+    setTimeout(() => btn.textContent = 'Copy', 2200)
+  })
+}
+
+/* ── Initial reveal for above-fold items ── */
+window.addEventListener('load', () => {
+  document.querySelectorAll('.reveal').forEach(el => {
+    if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('on')
+  })
+})
+
+/* ── Reading progress ── */
+;(function() {
+  const bar = document.getElementById('read-progress')
+  if (!bar) return
+  window.addEventListener('scroll', () => {
+    const total = document.documentElement.scrollHeight - window.innerHeight
+    bar.style.width = (total > 0 ? Math.min(window.scrollY / total * 100, 100) : 0) + '%'
+  }, { passive: true })
+})()
+
+/* ── Theme toggle ── */
+function toggleTheme() {
+  const html = document.documentElement
+  const isDark = html.getAttribute('data-theme') !== 'light'
+  const next = isDark ? 'light' : 'dark'
+  const icon = isDark ? '🌙' : '☀️'
+  html.setAttribute('data-theme', next)
+  localStorage.setItem('theme', next)
+  document.querySelectorAll('#theme-toggle, #theme-toggle-hero').forEach(b => b.textContent = icon)
+}
+;(function() {
+  const saved = localStorage.getItem('theme')
+  if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light')
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('#theme-toggle, #theme-toggle-hero').forEach(b => b.textContent = '🌙')
+    })
+  }
+})()
+</script>
+</body>
+</html>
