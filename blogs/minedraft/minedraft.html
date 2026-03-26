@@ -785,7 +785,7 @@ footer {
   <div class="tldr-inner">
     <span class="tldr-badge">TL;DR</span>
     <p class="tldr-text">
-      MineDraft introduces <strong>Batch Parallel Speculative Decoding</strong> — running the draft model on a dedicated GPU one step ahead so its latency is hidden inside the verifier's computation time. The result: <strong>up to 75% more throughput</strong> and <strong>39% lower end-to-end latency</strong> over standard speculative decoding, with just one extra GPU.
+      MineDraft introduces <strong>Batch Parallel Speculative Decoding</strong> — running drafter and verifier in parallel and alternatively sending one of two batches to the verifier, so drafting latency is hidden inside the verifier's computation time. The result: <strong>up to 75% more throughput</strong> and <strong>39% lower end-to-end latency</strong> over standard speculative decoding, with just one extra GPU.
     </p>
   </div>
 </div>
@@ -821,7 +821,7 @@ footer {
 
       <p>Speculative decoding is one of the cleverest tricks in modern LLM inference. A small, fast draft model races ahead to propose several tokens; the large target model verifies them all in one parallel forward pass. When draft quality is high, you get multiple tokens for the cost of a single verification step — a genuine free lunch.</p>
 
-      <p>But there is a subtle, rarely-examined inefficiency at the heart of every standard speculative decoding system: <strong>drafting and verification happen one after the other</strong>. The draft model generates its proposals. It finishes. Only then does the target model begin to verify. Those drafting milliseconds sit directly on the critical path — not hidden, not amortized, not free. Every cycle the draft model runs is a cycle the massive target model sits completely idle.</p>
+      <p>But there is a subtle, rarely-examined inefficiency at the heart of every standard speculative decoding system: <strong>drafting and verification happen one after the other</strong>. The draft model generates its proposals. It finishes. Only then does the target model begin to verify. Those drafting milliseconds sit directly on the critical path — not hidden, not amortized, not free. Every time the draft model runs is a period during which the massive target model sits completely idle.</p>
 
       <div class="callout">
         In standard speculative decoding, <strong>frequent rejections can make SD slower than ordinary autoregressive generation</strong> — because you've paid for drafting and gained nothing.
@@ -829,7 +829,7 @@ footer {
 
       <p>The severity of this problem compounds in production batch-serving settings. With tens of concurrent requests, the draft model must generate proposals for every active request at each step. The target model's entire forward pass waits. And because performance is acutely sensitive to acceptance rates, any degradation in draft quality can flip the system from faster to slower than if you'd never used speculative decoding at all.</p>
 
-      <p>Prior work addressed this by improving <em>draft quality</em> — better draft models (EAGLE, EAGLE-2), smarter token selection (TETRIS), tree-based speculation. MineDraft takes a fundamentally different angle: rather than making individual draft tokens more likely to be accepted, it asks <em>what if we could run drafting and verification at the same time?</em></p>
+      <p>Prior work addressed this by improving <em>draft quality</em> — better draft models (EAGLE, EAGLE-2), smarter token selection (TETRIS), tree-based speculation. MineDraft takes a supplementary angle: it asks <em>what if we could draft and verify simultaneously and use the saved GPU time for drafter to generate even better proposals?</em></p>
 
       <p>The name is a deliberate nod to the Minecraft game engine, which loads the next world chunk into memory while the player is still navigating the current one — so the world appears seamless. MineDraft applies exactly this background-loading principle to LLM inference, ensuring the draft model is always one step ahead and its compute time never appears on the critical path.</p>
     </section>
@@ -841,7 +841,7 @@ footer {
       <div class="section-kicker">Method</div>
       <h2>Batch Parallelism: Always One Step Ahead</h2>
 
-      <p>The core mechanism is elegant. A standard system processes <em>m</em> requests per step. MineDraft maintains <em>2m</em> requests split into two alternating batches. At any given moment, the <strong>target model is verifying Batch A</strong> while the <strong>draft model is speculating ahead for Batch B</strong>. At the next step, they swap roles. The draft model is never idle waiting for verification to finish — it is always working on the other batch.</p>
+      <p>The core mechanism is elegant. A standard system processes <em>m</em> requests per step. MineDraft maintains <em>2m</em> requests split into two batches, Batch 0 and Batch 1. At a given moment, the <strong>target model is verifying Batch 0 (current <em>target batch</em>)</strong> while the <strong>draft model is speculating ahead for Batch 1 (current <em>draft batch</em>)</strong>. At the next step, they swap roles — Batch 0 now becomes the draft batch and Batch 1 becomes the target batch — and so on so forth.</p>
 
       <!-- PIPELINE FIGURE -->
       <div id="pipeline" class="figure reveal" style="margin-top:32px">
@@ -852,13 +852,13 @@ footer {
             <div class="pipe-row">
               <div class="pipe-label">Process 1</div>
               <div class="pipe-track">
-                <div class="pb pb-d" style="width:72px">Draft</div>
-                <div class="pb pb-c" style="width:22px;font-size:8px">→</div>
-                <div class="pb pb-v" style="width:100px">Verify</div>
-                <div class="pb pb-d" style="width:72px">Draft</div>
-                <div class="pb pb-c" style="width:22px;font-size:8px">→</div>
-                <div class="pb pb-v" style="width:100px">Verify</div>
-                <div class="pb pb-d" style="width:72px">Draft</div>
+                <div class="pb pb-d" style="width:82px">Draft</div>
+                <div class="pb pb-c" style="width:16px;font-size:8px"></div>
+                <div class="pb pb-v" style="width:82px">Verify</div>
+                <div class="pb pb-d" style="width:82px">Draft</div>
+                <div class="pb pb-c" style="width:16px;font-size:8px"></div>
+                <div class="pb pb-v" style="width:82px">Verify</div>
+                <div class="pb pb-d" style="width:82px">Draft</div>
                 <div class="pb pb-dots">···</div>
               </div>
             </div>
@@ -871,11 +871,11 @@ footer {
               <div class="pipe-label" style="color:var(--a)">Drafter</div>
               <div class="pipe-track">
                 <div class="pb pb-d" style="width:82px">Batch 0</div>
-                <div class="pb pb-c" style="width:16px;font-size:8px">↓</div>
+                <div class="pb pb-c" style="width:16px;font-size:8px"></div>
                 <div class="pb pb-d" style="width:82px">Batch 1</div>
-                <div class="pb pb-c" style="width:16px;font-size:8px">↓</div>
+                <div class="pb pb-c" style="width:16px;font-size:8px"></div>
                 <div class="pb pb-d" style="width:82px">Batch 0</div>
-                <div class="pb pb-c" style="width:16px;font-size:8px">↓</div>
+                <div class="pb pb-c" style="width:16px;font-size:8px"></div>
                 <div class="pb pb-d" style="width:82px">Batch 1</div>
                 <div class="pb pb-dots">···</div>
               </div>
@@ -884,11 +884,11 @@ footer {
               <div class="pipe-label" style="color:var(--b)">Verifier</div>
               <div class="pipe-track">
                 <div class="pb pb-i" style="width:82px">init</div>
-                <div class="pb pb-c" style="width:16px;font-size:8px;opacity:.5">·</div>
+                <div class="pb pb-c" style="width:16px;font-size:8px"></div>
                 <div class="pb pb-v" style="width:82px">Batch 0</div>
-                <div class="pb pb-c" style="width:16px;font-size:8px;opacity:.5">·</div>
+                <div class="pb pb-c" style="width:16px;font-size:8px"></div>
                 <div class="pb pb-v" style="width:82px">Batch 1</div>
-                <div class="pb pb-c" style="width:16px;font-size:8px;opacity:.5">·</div>
+                <div class="pb pb-c" style="width:16px;font-size:8px"></div>
                 <div class="pb pb-v" style="width:82px">Batch 0</div>
                 <div class="pb pb-dots">···</div>
               </div>
@@ -918,7 +918,7 @@ footer {
             <div class="arch-card-icon ic-amber">⚙</div>
             <div class="arch-card-name">Batch Manager</div>
           </div>
-          <p>Assigns each incoming request to Batch 0 or Batch 1 using a <span class="tag">balance</span> counter that tracks size difference. Recycles batch IDs on completion or preemption. Tracks <span class="tag">skip_batch</span> — the current draft batch awaiting its first verification.</p>
+          <p>Assigns each running request a batch ID (0 for Batch 0, 1 for Batch 1) using a <span class="tag">balance</span> counter that tracks size difference. Recycles batch IDs on termination (finish, abort, or preemption).</p>
         </div>
         <div class="arch-card">
           <div class="arch-card-head">
@@ -932,14 +932,14 @@ footer {
             <div class="arch-card-icon ic-amber">✍</div>
             <div class="arch-card-name">Drafter</div>
           </div>
-          <p>Runs the small draft model on a <strong>dedicated separate GPU</strong>. Generates <em>k</em> speculative tokens for the draft batch while the Verifier processes the target batch. Communicates via direct GPU-to-GPU transfer — no CPU round-trip.</p>
+          <p>Runs the small draft model on a <strong>dedicated separate GPU</strong>. Generates <em>k</em> speculative tokens for the draft batch while the Verifier processes the target batch.</p>
         </div>
         <div class="arch-card">
           <div class="arch-card-head">
             <div class="arch-card-icon ic-green">✔</div>
             <div class="arch-card-name">Verifier</div>
           </div>
-          <p>Runs the large target model on the primary GPU cluster. Receives draft tokens from the Drafter, evaluates them in one forward pass, and returns accepted tokens plus target-sampled continuations back to the Drafter.</p>
+          <p>Runs the large target model on the primary GPU cluster. Receives draft tokens from the Drafter, evaluates them in one forward pass, and returns accepted tokens plus target sampler output back to the Drafter.</p>
         </div>
       </div>
 
@@ -968,7 +968,7 @@ footer {
       <div class="section-kicker">Results</div>
       <h2>Consistent Gains Across Every Setting</h2>
 
-      <p>MineDraft was evaluated across seven target–draft model pairings, four benchmark datasets (Arena, ShareGPT, Spec-Bench, LLM-Tough-Questions), and extensive ablations. The conclusion is unambiguous: MineDraft outperforms standard SD and all prior parallelism baselines in every configuration without exception.</p>
+      <p>MineDraft was evaluated across seven target–draft model pairings, four benchmark datasets (Arena, ShareGPT, Spec-Bench, LLM-Tough-Questions), and extensive ablations. The conclusion is unambiguous: MineDraft outperforms standard SD and all baselines in every configuration without exception.</p>
 
       <!-- STATS -->
       <div class="stats reveal">
@@ -987,55 +987,14 @@ footer {
       </div>
 
       <!-- THROUGHPUT BARS -->
-      <h3 id="throughput">Throughput: Qwen3-32B + 1.7B Draft, Arena</h3>
-      <p>Representative throughput numbers at 2 speculative tokens per step on the Arena dataset. MineDraft (extra=1) adds one additional concurrent sequence per batch on top of the base configuration.</p>
-
-      <div class="barchart reveal" id="bars">
-        <div class="bar-row">
-          <div class="bar-label">
-            <span class="bar-name">MineDraft (extra=1)</span>
-            <span class="bar-val">~ 570 tok/s</span>
-          </div>
-          <div class="bar-track"><div class="bar-fill mine" data-width="92"></div></div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">
-            <span class="bar-name">MineDraft (standalone)</span>
-            <span class="bar-val">~ 520 tok/s</span>
-          </div>
-          <div class="bar-track"><div class="bar-fill mine" data-width="84" style="opacity:.75"></div></div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">
-            <span class="bar-name">PEARL + TETRIS (extra=1)</span>
-            <span class="bar-val">~ 430 tok/s</span>
-          </div>
-          <div class="bar-track"><div class="bar-fill pearl" data-width="69" style="background:var(--b-dim);border:1px solid rgba(96,165,250,.35)"></div></div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">
-            <span class="bar-name">PEARL</span>
-            <span class="bar-val">~ 390 tok/s</span>
-          </div>
-          <div class="bar-track"><div class="bar-fill pearl" data-width="63" style="background:var(--b-dim);border:1px solid rgba(96,165,250,.35)"></div></div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">
-            <span class="bar-name">Standard SD</span>
-            <span class="bar-val">~ 310 tok/s</span>
-          </div>
-          <div class="bar-track"><div class="bar-fill std" data-width="50"></div></div>
-        </div>
-      </div>
-
-      <h3>Cross-Model Summary</h3>
+      <h3 id="throughput">Throughput</h3>
 
       <table class="rtable reveal">
         <thead>
           <tr>
             <th>Target Model</th>
             <th>Draft Model</th>
-            <th>Avg TP Gain ↑</th>
+            <th>Avg Gain vs Best BL ↑</th>
             <th>Max Gain vs SD ↑</th>
           </tr>
         </thead>
@@ -1043,19 +1002,19 @@ footer {
           <tr>
             <td>Qwen3-32B</td>
             <td>Qwen3-0.6B</td>
-            <td class="mid">38–47%</td>
+            <td class="mid">40–47%</td>
             <td class="good">70.3%</td>
           </tr>
           <tr>
             <td>Qwen3-32B</td>
             <td>Qwen3-1.7B</td>
-            <td class="mid">39–48%</td>
-            <td class="good">75.7%</td>
+            <td class="mid">38–48%</td>
+            <td class="good">75.6%</td>
           </tr>
           <tr>
             <td>Qwen3-32B</td>
             <td>Qwen3-4B</td>
-            <td class="mid">50–65%</td>
+            <td class="mid">49–65%</td>
             <td class="good">75.1%</td>
           </tr>
           <tr>
@@ -1065,24 +1024,84 @@ footer {
             <td class="good">OOM for baseline</td>
           </tr>
           <tr>
-            <td>Llama-3.3-70B</td>
+            <td>Llama-3.3-70B AWQ-INT4</td>
             <td>Llama-3.1-8B</td>
-            <td class="mid">22–31%</td>
-            <td class="good">37.1%</td>
+            <td class="mid">21–30%</td>
+            <td class="good">37.0%</td>
           </tr>
           <tr>
-            <td>Vicuna-33B + EAGLE</td>
+            <td>vicuna-33b</td>
             <td>EAGLE-Vicuna-33B</td>
-            <td class="mid">4–8%</td>
-            <td class="good">22.1%</td>
+            <td class="mid">1–7.5%</td>
+            <td class="good">22.0%</td>
+          </tr>
+          <tr>
+            <td>vicuna-13b</td>
+            <td>EAGLE-Vicuna-13B</td>
+            <td class="mid">2–6.9%</td>
+            <td class="good">21.0%</td>
           </tr>
         </tbody>
       </table>
 
       <h3 id="latency">End-to-End Latency</h3>
-      <p>Throughput and latency tell different stories. MineDraft excels at both. In the Qwen3-32B + 1.7B setting, it achieves an average E2E latency improvement of <span class="hi">24.6%</span> over the best baseline, with a maximum reduction of <span class="hi">39.5%</span> compared to standard SD. For Qwen3-32B + 4B, maximum reductions reach <span class="hi">38.9%</span>.</p>
 
-      <p>An important secondary finding: by placing the draft model on a dedicated GPU, MineDraft eliminates the VRAM contention that afflicts standard SD with large draft models. In Setting 4 (Qwen3-32B with Qwen3-8B as draft), standard SD fails entirely with an out-of-memory error. MineDraft continues operating at 250–560 tokens/sec.</p>
+      <table class="rtable reveal">
+        <thead>
+          <tr>
+            <th>Target Model</th>
+            <th>Draft Model</th>
+            <th>Avg Gain vs Best BL ↑</th>
+            <th>Max Gain vs SD ↑</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Qwen3-32B</td>
+            <td>Qwen3-0.6B</td>
+            <td class="mid">22–26%</td>
+            <td class="good">37.8%</td>
+          </tr>
+          <tr>
+            <td>Qwen3-32B</td>
+            <td>Qwen3-1.7B</td>
+            <td class="mid">18–28%</td>
+            <td class="good">39.5%</td>
+          </tr>
+          <tr>
+            <td>Qwen3-32B</td>
+            <td>Qwen3-4B</td>
+            <td class="mid">25–31%</td>
+            <td class="good">38.9%</td>
+          </tr>
+          <tr>
+            <td>Qwen3-32B</td>
+            <td>Qwen3-8B</td>
+            <td class="mid">—</td>
+            <td class="good">OOM for baseline</td>
+          </tr>
+          <tr>
+            <td>Llama-3.3-70B AWQ-INT4</td>
+            <td>Llama-3.1-8B</td>
+            <td class="mid">7–15%</td>
+            <td class="good">20.6%</td>
+          </tr>
+          <tr>
+            <td>vicuna-33b</td>
+            <td>EAGLE-Vicuna-33B</td>
+            <td class="mid">0.7-6%</td>
+            <td class="good">15.5%</td>
+          </tr>
+          <tr>
+            <td>vicuna-13b</td>
+            <td>EAGLE-Vicuna-13B</td>
+            <td class="mid">2–5.9%</td>
+            <td class="good">16.3%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>An important secondary finding: by placing the draft model on a dedicated GPU, MineDraft eliminates the VRAM contention that afflicts standard SD with large draft models. In Setting 4 (Qwen3-32B with Qwen3-8B as draft), standard SD fails entirely with an out-of-memory error. MineDraft continues operating at 332–610 tokens/sec.</p>
 
       <p>MineDraft also composes cleanly with existing drafting strategies. When integrated with TETRIS, it outperforms standalone TETRIS; paired with EAGLE, it outperforms standalone EAGLE. This orthogonality is load-bearing: any improvement to draft acceptance rates directly amplifies the parallel speedup.</p>
     </section>
@@ -1098,7 +1117,7 @@ footer {
         <div class="takeaway-icon"><img src="pickaxe.PNG" alt="pickaxe" style="height:1em;vertical-align:middle;display:inline"></div>
         <div class="takeaway-text">
           Standard speculative decoding puts the draft model <strong>on</strong> the critical path.
-          MineDraft takes it <strong>off</strong>. By running the drafter one batch ahead on its own GPU, drafting latency becomes a sunk cost hidden inside verification — yielding a speedup that is guaranteed by theory and confirmed across every model family tested.
+          MineDraft takes it <strong>off</strong>. By running the drafter one step ahead on its own GPU, drafting latency becomes a sunk cost hidden inside verification — yielding a speedup that is guaranteed by theory and confirmed across every model family tested.
         </div>
       </div>
 
@@ -1120,18 +1139,18 @@ footer {
             <div class="lim-dot"></div>
             Irrecoverable Batch Imbalance
           </div>
-          <p>When a request is terminated via user abort or preemption, new replacements are assigned to the draft batch — the only batch that can accept new requests. This can permanently skew batch sizes, degrading the load-balancing that Batch Parallelism relies on. Chunked prefill further exacerbates this. A future version of MineDraft will apply the full <span class="tag">balance</span>-tracking logic to all subsequent steps rather than switching to a simpler policy post-initialization.</p>
+          <p>When a request is terminated via user abort or preemption, new replacements are assigned to the draft batch to prevent verifying requests without available drafts. This can permanently skew batch sizes, degrading the load-balancing that Batch Parallelism relies on. Chunked prefill further exacerbates this. A future version of MineDraft will apply the full <span class="tag">balance</span>-tracking logic to all subsequent steps.</p>
         </div>
         <div class="lim-card">
           <div class="lim-title">
             <div class="lim-dot"></div>
             Batch Exhaustion Tail Effect
           </div>
-          <p>When one batch empties (all requests finish) and the other has no ready draft tokens, the system falls back to standard sequential SD. This tail effect limits the theoretical ceiling below 50% total speedup. A proposed mitigation draws from PEARL: instruct the Drafter to generate tokens for the remaining batch's in-flight requests, re-drafting on failure, to partially overlap even the final steps of a request batch.</p>
+          <p>When one batch empties (all requests finish) and the other has no ready draft tokens, the system falls back to standard sequential SD, circumscribing maximum potential improvement in implementation. A proposed mitigation is drawn from PEARL: propose draft tokens for the remaining batch while it is being verified, re-drafting requests that failed verification, to partially overlap even the final steps of a request batch.</p>
         </div>
       </div>
 
-      <p>Future work will also explore: extending MineDraft to the vLLM v1 engine and its chunked prefill mode; eliminating the dedicated GPU requirement using weight-padding techniques (enabling the draft and target models to share GPU memory); and studying whether Batch Parallelism can be combined with tree-attention drafting for compounding gains.</p>
+      <p>Future work will also explore: extending MineDraft to the vLLM v1 engine and its chunked prefill mode; eliminating the dedicated GPU requirement using weight-padding techniques; and studying whether MineDraft can be combined with parallel drafting methods (DFlash, P-EAGLE) for compounding gains.</p>
     </section>
 
     <hr>
