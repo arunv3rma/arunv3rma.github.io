@@ -21,6 +21,7 @@
           <div class="nav-links">
             <a href="index.html" class="active nav-home">Homepage</a>
             <a href="research.html">Research</a>
+            <a href="publications.html">Publications</a>
             <a href="experience.html">Experience</a>
             <a href="blogs.html">Blogs</a>
             <a href="teaching.html">Teaching</a>
@@ -152,6 +153,14 @@
             <hr>
             <ul class="news-list">
               <li>
+                <span class="news-date">May 2026</span>
+                <span>Published a blog post on <a href="blogs/memo" target="_blank">MeMo: Memory as a Model</a>.</span>
+              </li>
+              <li>
+                <span class="news-date">Apr 2026</span>
+                <span> <a href="https://arxiv.org/pdf/2603.18016v1" target="_blank">MineDraft</a> and <a href="https://arxiv.org/pdf/2408.12845" target="_blank">Keep Everyone Happy</a> accepted at ICML 2026.</span>
+              </li>
+              <li>
                 <span class="news-date">Mar 2026</span>
                 <span>Published a blog post on <a href="blogs/minedraft" target="_blank">MineDraft: A Framework for Batch Parallel Speculative Decoding</a>.</span>
               </li>
@@ -161,15 +170,7 @@
               </li>
               <li>
                 <span class="news-date">Jan 2026</span>
-                <span>Paper on <a href="https://openreview.net/pdf?id=RD4XgyVyGh" target="_blank">ActiveDPO</a> accepted at ICLR 2026.</span>
-              </li>
-              <li>
-                <span class="news-date">Nov 2026</span>
-                <span>Paper on <a href="https://arxiv.org/pdf/2603.02100" target="_blank">Stochastic Multi-Armed Bandits with Limited Control Variate</a> accepted at COMSNETS 2026.</span>
-              </li>
-              <li>
-                <span class="news-date">Sep 2025</span>
-                <span>Paper on <a href="https://openreview.net/pdf?id=bt2vhIphJ0" target="_blank">Incentivizing Time-Aware Fairness in Data Sharing</a> accepted at NeurIPS 2025.</span>
+                <span> <a href="https://openreview.net/pdf?id=RD4XgyVyGh" target="_blank">ActiveDPO</a> accepted at ICLR 2026.</span>
               </li>
             </ul>
           </div>
@@ -177,27 +178,33 @@
 
           <!-- Selected Papers -->
           <div id="selected-papers" style="margin-top:32px;">
-            <heading>Selected Publications &nbsp;&nbsp;<a href="research.html" style="font-size:13px;font-weight:normal;">View all publications →</a></heading>
+            <heading>Selected Publications &nbsp;&nbsp;<a href="publications.html" style="font-size:13px;font-weight:normal;">View all publications →</a></heading>
 
             <hr>
             <ul class="sel-papers">
 
                <li class="sel-paper">
+                <div class="sel-paper-title"><a href="https://arxiv.org/abs/2605.15156" target="_blank">MeMo: Memory as a Model</a></div>
+                <div class="sel-paper-authors">Ryan Wei Heng Quek*, Sanghyuk Lee*, Alfred Wei Lun Leong*, Arun Verma*, Alok Prakash, Nancy F. Chen, Bryan Kian Hsiang Low, Daniela Rus, Armando Solar-Lezama &nbsp;<em>(* equal contribution)</em></div>
+                <div class="sel-paper-meta"><span class="sel-venue">Preprint</span> <a href="blogs/memo" class="paper-link" target="_blank">Project Page</a></div>
+              </li>
+
+              <li class="sel-paper">
                 <div class="sel-paper-title"><a href="https://arxiv.org/pdf/2603.18016v1" target="_blank">MineDraft: A Framework for Batch Parallel Speculative Decoding</a></div>
                 <div class="sel-paper-authors">Tang Zhenwei*, Arun Verma*, Zijian Zhou, Zhaoxuan Wu, Alok Prakash, Daniela Rus, Bryan Kian Hsiang Low &nbsp;<em>(* equal contribution)</em></div>
-                <div class="sel-paper-meta"><span class="sel-venue">Preprint</span></div>
+                <div class="sel-paper-meta"><span class="sel-venue">ICML 2026</span> <a href="blogs/minedraft" class="paper-link" target="_blank">Project Page</a></div>
+              </li>
+
+              <li class="sel-paper">
+                <div class="sel-paper-title"><a href="https://arxiv.org/pdf/2408.12845" target="_blank">Keep Everyone Happy: Online Fair Division of Numerous Items with Few Copies</a></div>
+                <div class="sel-paper-authors">Arun Verma, Indrajit Saha, Makoto Yokoo, Bryan Kian Hsiang Low</div>
+                <div class="sel-paper-meta"><span class="sel-venue">ICML 2026</span> <span class="sel-venue">ICLR 2026 Workshop</span></div>
               </li>
 
               <li class="sel-paper">
                 <div class="sel-paper-title"><a href="https://arxiv.org/pdf/2602.20102" target="_blank">BarrierSteer: LLM Safety via Learning Barrier Steering</a></div>
                 <div class="sel-paper-authors">Thanh Q. Tran*, Arun Verma*, Kiwan Wong, Bryan Kian Hsiang Low, Daniela Rus, Wei Xiao &nbsp;<em>(* equal contribution)</em></div>
-                <div class="sel-paper-meta"><span class="sel-venue">ICLR 2026 Workshop</span></div>
-              </li>
-
-              <li class="sel-paper">
-                <div class="sel-paper-title"><a href="https://openreview.net/pdf?id=RD4XgyVyGh" target="_blank">ActiveDPO: Active Direct Preference Optimization for Sample-Efficient Alignment</a></div>
-                <div class="sel-paper-authors">Xiaoqiang Lin, Arun Verma, Dai Zhongxiang, Daniela Rus, Bryan Kian Hsiang Low</div>
-                <div class="sel-paper-meta"><span class="sel-venue">ICLR 2026</span> <span class="sel-venue">ICML 2025 Workshop</span></div>
+                <div class="sel-paper-meta"><span class="sel-venue">ICLR 2026 Workshop</span> <span class="sel-venue" style="background:#fdf3e8;color:#c05a00;border-color:rgba(192,90,0,0.25);">Spotlight</span></div>
               </li>
 
               <li class="sel-paper">
@@ -216,7 +223,7 @@
         <div class="site-footer">
           <p>
             &copy; 2026 Arun Verma
-            &nbsp;·&nbsp; Last updated: March 25, 2026. 
+            &nbsp;·&nbsp; Last updated: 19 May 2026. 
           </p>
           <p>
             <a href="https://info.flagcounter.com/DTQh" target="_blank" style="display:none"><img src="https://s01.flagcounter.com/count2/DTQh/bg_FFFFFF/txt_060B38/border_070226/columns_2/maxflags_10/viewers_0/labels_0/pageviews_0/flags_0/percent_0/" alt="Free counters!" border="0"></a>
