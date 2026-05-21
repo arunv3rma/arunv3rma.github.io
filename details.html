@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Research - Arun Verma</title>
+  <meta name="author" content="Arun Verma">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="stylesheet.css">
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <style>
+    /* ── Hero quote ─────────────────────────────────────────── */
+    .res-hero {
+      position: relative;
+      background: linear-gradient(135deg, #fdf8f8 0%, #fff 100%);
+      border: 1px solid rgba(163,31,52,0.14);
+      border-radius: 6px;
+      padding: 26px 28px 22px 36px;
+      overflow: hidden;
+    }
+    .res-hero::before {
+      content: '\201C';
+      position: absolute;
+      top: -14px;
+      left: 14px;
+      font-size: 96px;
+      font-family: Georgia, 'Times New Roman', serif;
+      color: rgba(163,31,52,0.09);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+    .res-hero p {
+      margin: 0;
+      font-size: 14.5px;
+      line-height: 1.78;
+      color: var(--text-secondary);
+      font-style: italic;
+      text-align: justify;
+    }
+
+    /* ── Overview body ───────────────────────────────────────── */
+    .res-overview-body {
+      font-size: 14.5px;
+      color: var(--text-secondary);
+      line-height: 1.74;
+      text-align: justify;
+    }
+    .res-overview-body p { margin: 0 0 14px; }
+    .res-overview-body p:last-child { margin-bottom: 0; }
+
+    /* ── Pillar cards ────────────────────────────────────────── */
+    .res-pillars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 22px 0 6px;
+    }
+    @media (max-width: 520px) {
+      .res-pillars { grid-template-columns: 1fr; }
+    }
+    .res-pillar {
+      border: 1px solid var(--border-light);
+      border-top: 3px solid var(--mit-red);
+      border-radius: 0 0 5px 5px;
+      padding: 16px 14px 14px;
+      text-align: center;
+      background: var(--bg);
+      transition: box-shadow 0.15s;
+    }
+    .res-pillar:hover {
+      box-shadow: 0 3px 14px rgba(163,31,52,0.10);
+    }
+    .res-pillar-icon-wrap {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #fdf2f4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+    }
+    .res-pillar-icon {
+      width: 22px;
+      height: 22px;
+      color: var(--mit-red);
+    }
+    .res-pillar-label {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+    .res-pillar-desc {
+      font-size: 11.5px;
+      color: var(--text-light);
+      line-height: 1.5;
+    }
+
+    /* ── MAS unifier banner ──────────────────────────────────── */
+    .res-mas-banner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 32px 0 20px;
+      color: var(--text-light);
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .res-mas-banner::before,
+    .res-mas-banner::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-light);
+    }
+    .res-mas-label {
+      white-space: nowrap;
+    }
+
+    /* ── Direction cards ─────────────────────────────────────── */
+    .res-card {
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      padding: 18px 20px 16px;
+      margin-bottom: 14px;
+      background: var(--bg);
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .res-card:hover {
+      box-shadow: 0 3px 18px rgba(163,31,52,0.09);
+      border-color: rgba(163,31,52,0.22);
+    }
+    .res-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+      margin-bottom: 13px;
+    }
+    .res-card-icon-wrap {
+      flex-shrink: 0;
+      width: 38px;
+      height: 38px;
+      border-radius: 6px;
+      background: #fdf2f4;
+      border: 1px solid rgba(163,31,52,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .res-card-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--mit-red);
+    }
+    .res-card-heading { flex: 1; }
+    .res-card-subtitle {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--mit-red);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 2px;
+    }
+    .res-card-title {
+      font-size: 15.5px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .res-card-body {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.70;
+    }
+    .res-card-body p { margin: 0 0 9px; }
+    .res-card-body p:last-of-type { margin-bottom: 0; }
+    .res-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 13px;
+    }
+    .res-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-light);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      padding: 2px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    /* ── Paper group heading ─────────────────────────────────── */
+    .res-paper-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 26px 0 2px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .res-paper-group::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-light);
+    }
+    .res-paper-group:first-child { margin-top: 4px; }
+  </style>
+</head>
+
+<body>
+
+  <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+
+    <tr style="padding:0px">
+      <td class="page-content">
+
+        <!-- Navigation -->
+        <nav class="main-nav">
+          <div class="nav-links">
+            <a href="index.html" class="nav-home">Homepage</a>
+            <a href="research.html" class="active">Research</a>
+            <a href="publications.html">Publications</a>
+            <a href="experience.html">Experience</a>
+            <a href="blogs.html">Blogs</a>
+            <a href="teaching.html">Teaching</a>
+            <a href="services.html">Services</a>
+            <a href="talks.html">Talks</a>
+            <a href="awards.html">Awards</a>
+            <a href="news.html">News</a>
+          </div>
+          <button class="nav-toggle" type="button" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+          </button>
+        </nav>
+
+        <div class="inner-content">
+
+          <!-- Hero vision quote -->
+
+          <div class="research-quote">
+            "Basically, I am not interested in doing research and I never have been… I am interested in understanding, which is quite a different thing. And often to understand something you have to work it out yourself because no one else has done it." — David Blackwell
+          </div>
+
+          <!-- Research Overview -->
+          <div style="margin-top:32px;">
+            <heading>Research Overview</heading>
+            <hr>
+
+            <div class="res-overview-body">
+              <p>Foundation models are rapidly moving from controlled research into critical real-world infrastructure in robotics, clinical decision support, industrial inspection, and edge devices, where environments shift, failures carry consequences, and compute is constrained. Yet a deep gap remains between impressive AI demonstrations and safe, robust deployment. Closing this gap is not merely a technical challenge; it is essential for AI to realise its transformative potential.</p>
+              <p>Real-world deployment exposes three fundamental limitations in current AI systems: <strong>limited adaptiveness</strong> (models remain static and require costly retraining), <strong>insufficient trustworthiness</strong> (poor calibration and overconfident predictions in high-stakes settings), and <strong>resource inefficiency</strong> (reliance on monolithic architectures).</p>
+              <p>My research addresses these challenges through three directions: <strong>Adaptive AI</strong>, <strong>Trustworthy AI</strong>, and <strong>Resource-Efficient AI</strong>, unified through the concept of a <strong>Modular AI System (MAS)</strong>. Rather than treating AI as monolithic, MAS reconceptualises it as interacting, independently configurable components built around a shared core. This framework enables fine-grained adaptation, well-calibrated behaviour, and efficient deployment within a unified architecture.</p>
+            </div>
+
+            <!-- Three pillar cards -->
+            <div class="res-pillars">
+
+              <div class="res-pillar">
+                <div class="res-pillar-icon-wrap">
+                  <svg class="res-pillar-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6"/>
+                    <path d="M2.5 12A10 10 0 0 1 18.5 4.3L21.5 8"/>
+                    <path d="M2.5 22v-6h6"/>
+                    <path d="M21.5 12A10 10 0 0 1 5.5 19.7L2.5 16"/>
+                  </svg>
+                </div>
+                <div class="res-pillar-label">Adaptive AI</div>
+                <div class="res-pillar-desc">Continual learning &amp; dynamic adaptation in evolving environments</div>
+              </div>
+
+              <div class="res-pillar">
+                <div class="res-pillar-icon-wrap">
+                  <svg class="res-pillar-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                  </svg>
+                </div>
+                <div class="res-pillar-label">Trustworthy AI</div>
+                <div class="res-pillar-desc">Calibrated uncertainty &amp; reliable behavior in high-stakes settings</div>
+              </div>
+
+              <div class="res-pillar">
+                <div class="res-pillar-icon-wrap">
+                  <svg class="res-pillar-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                </div>
+                <div class="res-pillar-label">Resource-Efficient AI</div>
+                <div class="res-pillar-desc">Principled compression &amp; deployment under compute constraints</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Research Directions -->
+          <div style="margin-top:36px;">
+            <heading>Research Directions</heading>
+            <hr>
+
+            <div class="res-mas-banner">
+              <span class="res-mas-label">Unified by Modular AI System (MAS)</span>
+            </div>
+
+            <!-- Direction 1: Adaptive AI -->
+            <div class="res-card">
+              <div class="res-card-header">
+                <div class="res-card-icon-wrap">
+                  <svg class="res-card-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6"/>
+                    <path d="M2.5 12A10 10 0 0 1 18.5 4.3L21.5 8"/>
+                    <path d="M2.5 22v-6h6"/>
+                    <path d="M21.5 12A10 10 0 0 1 5.5 19.7L2.5 16"/>
+                  </svg>
+                </div>
+                <div class="res-card-heading">
+                  <div class="res-card-subtitle">Direction 1</div>
+                  <div class="res-card-title">Adaptive AI</div>
+                </div>
+              </div>
+              <div class="res-card-body">
+                <p>Deployment environments are inherently dynamic. A diagnostic AI may encounter rare disease presentations never seen in training; a robot may navigate an unseen environment; an industrial monitor may face entirely new fault signatures. Most foundation models remain static after training &mdash; lacking mechanisms to update, self-correct, or generalise without expensive retraining or fine-tuning.</p>
+                <p>Within the MAS framework, I design components that can be independently updated or replaced without disturbing the rest of the system. This enables fine-grained, continual adaptation: updating task-specific reasoning without retraining perception, and seamlessly delegating sub-tasks to specialised expert components.</p>
+              </div>
+              <div class="res-tags">
+                <span class="res-tag">Continual Learning</span>
+                <span class="res-tag">Few-Shot Adaptation</span>
+                <span class="res-tag">Test-Time Inference</span>
+                <span class="res-tag">Lifelong AI</span>
+              </div>
+            </div>
+
+            <!-- Direction 2: Trustworthy AI -->
+            <div class="res-card">
+              <div class="res-card-header">
+                <div class="res-card-icon-wrap">
+                  <svg class="res-card-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                  </svg>
+                </div>
+                <div class="res-card-heading">
+                  <div class="res-card-subtitle">Direction 2</div>
+                  <div class="res-card-title">Trustworthy AI</div>
+                </div>
+              </div>
+              <div class="res-card-body">
+                <p>High-stakes applications &mdash; clinical decision support, autonomous systems, infrastructure monitoring &mdash; demand more than accurate predictions. They require reliability, calibrated uncertainty, and predictable behavior. Overconfident failures in these settings can have severe, irreversible consequences.</p>
+                <p>My work develops principled calibration and uncertainty quantification methods for modular systems, with guarantees that hold across operating conditions. By isolating uncertainty within targeted components of MAS, the system can selectively activate high-capacity modules only when uncertainty demands it &mdash; achieving reliability without sacrificing efficiency.</p>
+              </div>
+              <div class="res-tags">
+                <span class="res-tag">Uncertainty Quantification</span>
+                <span class="res-tag">Calibration</span>
+                <span class="res-tag">Safety</span>
+                <span class="res-tag">Decision-Making Under Uncertainty</span>
+              </div>
+            </div>
+
+            <!-- Direction 3: Resource-Efficient AI -->
+            <div class="res-card">
+              <div class="res-card-header">
+                <div class="res-card-icon-wrap">
+                  <svg class="res-card-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                </div>
+                <div class="res-card-heading">
+                  <div class="res-card-subtitle">Direction 3</div>
+                  <div class="res-card-title">Resource-Efficient AI</div>
+                </div>
+              </div>
+              <div class="res-card-body">
+                <p>A standard large language model demands orders of magnitude more compute than available on edge hardware. Deploying AI under real-world constraints on compute, memory, latency, and cloud connectivity requires principled compression and specialisation &mdash; not just post-hoc pruning.</p>
+                <p>The MAS architecture naturally enables resource efficiency: components can be compressed and specialised independently, and the system can dynamically adjust its compute footprint based on task complexity and available resources. This achieves the flexibility of large-scale models within the footprint of resource-constrained hardware.</p>
+              </div>
+              <div class="res-tags">
+                <span class="res-tag">Model Compression</span>
+                <span class="res-tag">Speculative Decoding</span>
+                <span class="res-tag">Edge AI</span>
+                <span class="res-tag">Efficient Inference</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Representative Papers -->
+          <div style="margin-top:36px;">
+            <heading>Representative Papers &nbsp;&nbsp;<a href="publications.html" style="font-size:13px;font-weight:normal;">View all publications &rarr;</a></heading>
+            <hr>
+
+            <!-- Adaptive AI -->
+            <div class="res-paper-group">Adaptive AI</div>
+            <ul class="sel-papers">
+
+              <li class="sel-paper">
+                <div class="sel-paper-title"><a href="https://arxiv.org/abs/2605.15156" target="_blank" rel="noopener noreferrer">MeMo: Memory as a Model</a></div>
+                <div class="sel-paper-authors">Ryan Wei Heng Quek*, Sanghyuk Lee*, Alfred Wei Lun Leong*, Arun Verma*, Alok Prakash, Nancy F. Chen, Bryan Kian Hsiang Low, Daniela Rus, Armando Solar-Lezama &nbsp;<em>(* equal contribution)</em></div>
+                <div class="sel-paper-meta">
+                  <span class="sel-venue">Preprint</span>
+                  <a href="blogs/memo" class="paper-link" target="_blank" rel="noopener noreferrer">Project Page</a>
+                </div>
+              </li>
+
+              <li class="sel-paper">
+                <div class="sel-paper-title"><a href="https://openreview.net/pdf?id=VELhv9BBfn" target="_blank" rel="noopener noreferrer">Neural Dueling Bandits: Preference-Based Optimization with Human Feedback</a></div>
+                <div class="sel-paper-authors">Arun Verma*, Dai Zhongxiang*, Xiaoqiang Lin, Patrick Jaillet, Bryan Kian Hsiang Low &nbsp;<em>(* equal contribution)</em></div>
+                <div class="sel-paper-meta">
+                  <span class="sel-venue">ICLR 2025</span>
+                  <span class="sel-venue">ICML 2024 Workshop</span>
+                </div>
+              </li>
+
+              <li class="sel-paper">
+                <div class="sel-paper-title"><a href="https://proceedings.neurips.cc/paper_files/paper/2023/file/0e0157ce5ea15831072be4744cbd5334-Paper-Conference.pdf" target="_blank" rel="noopener noreferrer">Exploiting Correlated Auxiliary Feedback in Parameterized Bandits</a></div>
+                <div class="sel-paper-authors">Arun Verma, Dai Zhongxiang, Yao Shu, Bryan Kian Hsiang Low</div>
+                <div class="sel-paper-meta">
+                  <span class="sel-venue">NeurIPS 2023</span>
+                </div>
+              </li>
+
+              <li class="sel-paper">
+                <div class="sel-paper-title"><a href="https://arxiv.org/pdf/2206.09341.pdf" target="_blank" rel="noopener noreferrer">Bayesian Optimization under Stochastic Delayed Feedback</a></div>
+                <div class="sel-paper-authors">Arun Verma*, Dai Zhongxiang*, Bryan Kian Hsiang Low &nbsp;<em>(* equal contribution)</em></div>
+                <div class="sel-paper-meta">
+                  <span class="sel-venue">ICML 2022</span>
+                  <span class="sel-venue" style="background:#fdf3e8;color:#c05a00;border-color:rgba(192,90,0,0.25);">Spotlight</span>
+                </div>
+              </li>
+
+            </ul>
+
+            <!-- Trustworthy AI -->
+            <div class="res-paper-group">Trustworthy AI</div>
+            <ul class="sel-papers">
+
+              <li class="sel-paper">
+                <div class="sel-paper-title"><a href="https://arxiv.org/pdf/2602.20102" target="_blank" rel="noopener noreferrer">BarrierSteer: LLM Safety via Learning Barrier Steering</a></div>
+                <div class="sel-paper-authors">Thanh Q. Tran*, Arun Verma*, Kiwan Wong, Bryan Kian Hsiang Low, Daniela Rus, Wei Xiao &nbsp;<em>(* equal contribution)</em></div>
+                <div class="sel-paper-meta">
+                  <span class="sel-venue">ICLR 2026 Workshop</span>
+                  <span class="sel-venue" style="background:#fdf3e8;color:#c05a00;border-color:rgba(192,90,0,0.25);">Spotlight</span>
+                </div>
+              </li>
+
+              <li class="sel-paper">
+                <div class="sel-paper-title"><a href="https://openreview.net/pdf?id=RD4XgyVyGh" target="_blank" rel="noopener noreferrer">ActiveDPO: Active Direct Preference Optimization for Sample-Efficient Alignment</a></div>
+                <div class="sel-paper-authors">Xiaoqiang Lin, Arun Verma, Dai Zhongxiang, Daniela Rus, Bryan Kian Hsiang Low</div>
+                <div class="sel-paper-meta">
+                  <span class="sel-venue">ICLR 2026</span>
+                  <span class="sel-venue">ICML 2025 Workshop</span>
+                </div>
+              </li>
+
+              <li class="sel-paper">
+                <div class="sel-paper-title"><a href="https://arxiv.org/pdf/2407.14845" target="_blank" rel="noopener noreferrer">Understanding the Relationship between Prompts and Response Uncertainty in Large Language Models</a></div>
+                <div class="sel-paper-authors">Ze Yu Zhang*, Arun Verma*, Finale Doshi-Velez, Bryan Kian Hsiang Low &nbsp;<em>(* equal contribution)</em></div>
+                <div class="sel-paper-meta">
+                  <span class="sel-venue">ACL Findings 2026</span>
+                  <span class="sel-venue">ICLR 2025 Workshop</span>
+                </div>
+              </li>
+
+              <li class="sel-paper">
+                <div class="sel-paper-title"><a href="https://openreview.net/pdf?id=-RwZOVybbj" target="_blank" rel="noopener noreferrer">Risk-Aware Reinforcement Learning with Coherent Risk Measures and Non-Linear Function Approximation</a></div>
+                <div class="sel-paper-authors">Chi Thanh Lam, Arun Verma, Bryan Kian Hsiang Low, Patrick Jaillet</div>
+                <div class="sel-paper-meta">
+                  <span class="sel-venue">ICLR 2023</span>
+                </div>
+              </li>
+
+            </ul>
+
+            <!-- Resource-Efficient AI -->
+            <div class="res-paper-group">Resource-Efficient AI</div>
+            <ul class="sel-papers">
+
+              <li class="sel-paper">
+                <div class="sel-paper-title"><a href="https://arxiv.org/pdf/2603.18016v1" target="_blank" rel="noopener noreferrer">MineDraft: A Framework for Batch Parallel Speculative Decoding</a></div>
+                <div class="sel-paper-authors">Tang Zhenwei*, Arun Verma*, Zijian Zhou, Zhaoxuan Wu, Alok Prakash, Daniela Rus, Bryan Kian Hsiang Low &nbsp;<em>(* equal contribution)</em></div>
+                <div class="sel-paper-meta">
+                  <span class="sel-venue">ICML 2026</span>
+                  <a href="blogs/minedraft" class="paper-link" target="_blank" rel="noopener noreferrer">Project Page</a>
+                </div>
+              </li>
+
+              <li class="sel-paper">
+                <div class="sel-paper-title"><a href="https://aclanthology.org/2025.acl-long.1598.pdf" target="_blank" rel="noopener noreferrer">TETRIS: Optimal Draft Token Selection for Batch Speculative Decoding</a></div>
+                <div class="sel-paper-authors">Zhaoxuan Wu*, Zijian Zhou*, Arun Verma, Alok Prakash, Daniela Rus, Bryan Kian Hsiang Low &nbsp;<em>(* equal contribution)</em></div>
+                <div class="sel-paper-meta">
+                  <span class="sel-venue">ACL 2025</span>
+                </div>
+              </li>
+
+              <li class="sel-paper">
+                <div class="sel-paper-title"><a href="https://aclanthology.org/2025.findings-emnlp.1373.pdf" target="_blank" rel="noopener noreferrer">Uncovering Scaling Laws for Large Language Models via Inverse Problems</a></div>
+                <div class="sel-paper-authors">Arun Verma, Zhaoxuan Wu, Zijian Zhou, Xiaoqiang Lin, Zhiliang Chen, Rachael Hwee Ling Sim, et al.</div>
+                <div class="sel-paper-meta">
+                  <span class="sel-venue">EMNLP Findings 2025</span>
+                </div>
+              </li>
+
+              <li class="sel-paper">
+                <div class="sel-paper-title"><a href="https://openreview.net/forum?id=jHAAHg8T7Nx" target="_blank" rel="noopener noreferrer">Stochastic Multi-Armed Bandits with Control Variates</a></div>
+                <div class="sel-paper-authors">Arun Verma, Manjesh K. Hanawal</div>
+                <div class="sel-paper-meta">
+                  <span class="sel-venue">NeurIPS 2021</span>
+                </div>
+              </li>
+
+            </ul>
+          </div>
+
+        </div><!-- /.inner-content -->
+
+        <!-- Footer -->
+        <div class="site-footer">
+          <p>
+            &copy; 2026 Arun Verma
+            &nbsp;·&nbsp; Last updated: 19 May 2026.
+          </p>
+        </div>
+
+      </td>
+    </tr>
+  </table>
+
+<script>
+document.querySelector('.nav-toggle').addEventListener('click', function() {
+  document.querySelector('.main-nav').classList.toggle('nav-open');
+});
+</script>
+</body>
+</html>
