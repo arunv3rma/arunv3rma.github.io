@@ -136,6 +136,8 @@ img { max-width:100%; display:block }
 .article p:last-child { margin-bottom:0 }
 .article strong { color:var(--t1); font-weight:600 }
 .article hr { border:none; height:1px; background:linear-gradient(90deg,transparent,var(--border2),transparent); margin:72px 0 }
+.section-kicker { font-size:10px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--a); margin-bottom:12px; display:inline-flex; align-items:center; gap:8px;}
+.section-kicker::before {  content:''; display:inline-block; width:20px; height:2px; border-radius:1px; background:var(--a); opacity:.7;}
 .figure { margin:36px 0 40px; border-radius:16px; overflow:hidden; border:1px solid var(--border2); background:var(--bg1); transition:border-color .25s, transform .25s }
 .figure:hover { border-color:rgba(34,211,238,.28); transform:translateY(-2px) }
 .figure-caption { padding:14px 24px 18px; font-size:13px; color:var(--t4); line-height:1.6; border-top:1px solid var(--border) }
@@ -407,7 +409,7 @@ body { font-feature-settings: "kern" 1 }
   <article class="article">
 
     <section id="overview" class="reveal">
-      <div class="kicker">The Problem</div>
+      <div class="section-kicker">The Problem</div>
       <h2>LLMs Are Frozen in Time</h2>
 
       <p>Large language models are, at their core, static artifacts. Once pretraining ends, the weights freeze, and so does the world they know. For real applications, this is not merely inconvenient but architecturally limiting: a medical assistant blind to new clinical guidelines, a legal tool unaware of recent rulings, an enterprise system that cannot consult documents that postdate its training cutoff.</p>
@@ -456,7 +458,7 @@ body { font-feature-settings: "kern" 1 }
     <hr>
 
     <section id="method" class="reveal">
-      <div class="kicker">Method</div>
+      <div class="section-kicker">Method</div>
       <h2>Two Models, One Knowledge Interface</h2>
 
       <p>MeMo introduces a two-model architecture. The <strong>Memory model</strong>, substantially smaller than the Executive model, is trained on a synthesized reflection QA dataset derived from a target corpus. It internalizes the corpus's knowledge parametrically and answers sub-queries entirely from its weights at inference time, with no access to source documents. The <strong>Executive model</strong> (the large frozen LLM) treats the Memory model as an external oracle, querying it through a structured multi-turn protocol to answer user queries.</p>
@@ -553,7 +555,7 @@ body { font-feature-settings: "kern" 1 }
     <hr>
 
     <section id="results" class="reveal">
-      <div class="kicker">Results</div>
+      <div class="section-kicker">Results</div>
       <h2>Beating RAG Where It Matters Most</h2>
 
       <p>MeMo was evaluated on three knowledge-intensive benchmarks spanning different reasoning challenges: <strong>BrowseComp-Plus</strong> (multi-hop retrieval across 300 questions with 3,541 total corpus documents), <strong>NarrativeQA</strong> (long-document comprehension across books and movie scripts), and <strong>MuSiQue</strong> (multi-step reasoning across 2–4 Wikipedia paragraphs, 1,000 questions). Results are reported under two Executive models (Qwen2.5-32B-Instruct and Gemini-3.0-Flash) against three retrieval baselines (BM25, NV-Embed-V2, HippoRAG2) and one latent-memory baseline (Cartridges).</p>
@@ -666,7 +668,7 @@ body { font-feature-settings: "kern" 1 }
     <hr>
 
     <section id="takeaway" class="reveal">
-      <div class="kicker">Key Insight</div>
+      <div class="section-kicker">Key Insight</div>
       <h2>One Thing to Remember</h2>
 
       <div class="takeaway reveal">
@@ -687,7 +689,7 @@ body { font-feature-settings: "kern" 1 }
     <hr>
 
     <section id="limitations" class="reveal">
-      <div class="kicker">Limitations &amp; Future Work</div>
+      <div class="section-kicker">Limitations &amp; Future Work</div>
       <h2>Where MeMo Falls Short</h2>
 
       <p>There are four structural constraints of the current design:</p>
@@ -717,7 +719,7 @@ body { font-feature-settings: "kern" 1 }
     <hr>
 
     <section id="citation" class="reveal">
-      <div class="kicker">Citation</div>
+      <div class="section-kicker">Citation</div>
       <h2>Cite this Work</h2>
 
       <div class="codeblock">
