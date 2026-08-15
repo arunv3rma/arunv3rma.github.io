@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeurIPS'26 Tutorial: RL for Agentic-AI</title>
+<meta name="description" content="From Heuristics to Guarantees: Bandit and RL Blueprint for Reliable Agentic-AI. NeurIPS 2026 Tutorial by Aadirupa Saha, Arun Verma, and Djallel Bouneffouf.">
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,ital,wght@8..60,0,400;8..60,0,600;8..60,0,700;8..60,1,400;8..60,1,600&family=Figtree:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* ─── TOKENS ─────────────────────────────────────────────── */
+:root {
+  --font-serif: 'Source Serif 4', Georgia, serif;
+  --font-sans:  'Figtree', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:  'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  --nav-height: 60px;
+  --toc-width:  188px;
+  --measure:    780px;
+
+  /* light palette (default, mirrors the reference site) */
+  --color-bg:    #fcfbf7;
+  --color-bg-1:  #f5f3ec;
+  --color-bg-2:  #efece3;
+  --color-bg-3:  #e6e2d7;
+  --color-bg-4:  #dcd7c9;
+
+  /* navy: primary accent, used for links and topic headings */
+  --color-accent:      #1d4ed8;
+  --color-accent-hi:   #1e3a8a;
+  --color-accent-dim:  rgba(29,78,216,.09);
+
+  /* crimson: section titles, matching the reference site */
+  --color-mark:        #9f1239;
+  --color-mark-dim:    rgba(159,18,57,.09);
+
+  /* green: durations and timings */
+  --color-time:        #15803d;
+  --color-time-dim:    rgba(21,128,61,.10);
+
+  --color-border:   rgba(0,0,0,.11);
+  --color-border-2: rgba(0,0,0,.19);
+
+  --color-text-1: #13171e;
+  --color-text-2: #2b3441;
+  --color-text-3: #4b5665;
+  --color-text-4: #6e7b8b;
+  --color-text-5: #98a3b0;
+
+  --color-grid:   rgba(29,78,216,.05);
+  --color-glow-1: rgba(29,78,216,.10);
+  --color-glow-2: rgba(159,18,57,.06);
+  --shadow-card: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05);
+}
+
+[data-theme="dark"] {
+  --color-bg:    #0b0f18;
+  --color-bg-1:  #0f1420;
+  --color-bg-2:  #141a28;
+  --color-bg-3:  #1a2131;
+  --color-bg-4:  #212940;
+
+  --color-accent:     #7dabfa;
+  --color-accent-hi:  #a5c6ff;
+  --color-accent-dim: rgba(125,171,250,.14);
+
+  --color-mark:       #fb7185;
+  --color-mark-dim:   rgba(251,113,133,.13);
+
+  --color-time:       #4ade80;
+  --color-time-dim:   rgba(74,222,128,.12);
+
+  --color-border:   rgba(255,255,255,.08);
+  --color-border-2: rgba(255,255,255,.16);
+
+  --color-text-1: #f1f5f9;
+  --color-text-2: #c5d0dd;
+  --color-text-3: #8b99a9;
+  --color-text-4: #5d6a7a;
+  --color-text-5: #3e4857;
+
+  --color-grid:   rgba(125,171,250,.055);
+  --color-glow-1: rgba(125,171,250,.16);
+  --color-glow-2: rgba(251,113,133,.08);
+  --shadow-card: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+}
+
+/* ─── RESET ──────────────────────────────────────────────── */
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box }
+html { scroll-behavior:smooth; scroll-padding-top:calc(var(--nav-height) + 26px) }
+body {
+  font-family: var(--font-serif);
+  background: var(--color-bg);
+  color: var(--color-text-2);
+  font-size: 17.5px;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+  transition: background .25s ease, color .25s ease;
+}
+a { color: var(--color-accent); text-decoration:none; transition: color .15s }
+a:hover { color: var(--color-accent-hi); text-decoration:underline }
+::selection { background: var(--color-accent); color:#fff }
+img { max-width:100%; display:block }
+[id] { scroll-margin-top: calc(var(--nav-height) + 26px) }
+
+/* ─── NAV ────────────────────────────────────────────────── */
+.nav {
+  position:sticky; top:0; z-index:200;
+  height: var(--nav-height);
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 0 30px;
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-border);
+}
+.nav-brand { display:flex; align-items:center; gap:11px }
+.nav-brand:hover { text-decoration:none }
+.nav-brand img { width:30px; height:30px; object-fit:contain; flex-shrink:0 }
+.nav-brand-text {
+  font-family:var(--font-sans); font-size:15px; font-weight:800;
+  color:var(--color-text-1); letter-spacing:-.01em; line-height:1.2;
+}
+.nav-brand-text span { display:block; font-size:11px; font-weight:600; color:var(--color-text-4); letter-spacing:.04em }
+.nav-links { display:flex; align-items:center; gap:2px }
+.nav-a {
+  font-family:var(--font-sans); font-size:13px; font-weight:600;
+  color:var(--color-text-3); padding:5px 11px; border-radius:8px; transition:all .15s;
+}
+.nav-a:hover { color:var(--color-text-1); background:var(--color-bg-2); text-decoration:none }
+@media(max-width:900px){ .nav-links .nav-a { display:none } .nav { padding:0 18px } }
+
+/* ─── HERO ───────────────────────────────────────────────── */
+.hero { position:relative; padding: 66px 30px 58px; text-align:center; overflow:hidden }
+.hero-grid {
+  position:absolute; inset:0; pointer-events:none;
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 74% 78% at 50% 0%, black 26%, transparent 78%);
+  animation: grid-drift 26s linear infinite;
+}
+@keyframes grid-drift { to { background-position: 44px 44px } }
+.hero-glow {
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 86% 56% at 50% -16%, var(--color-glow-1) 0%, transparent 66%),
+    radial-gradient(ellipse 48% 34% at 80% 92%, var(--color-glow-2) 0%, transparent 58%);
+}
+.hero-inner { position:relative; max-width: 900px; margin:0 auto }
+.hero h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 4.3vw, 45px);
+  font-weight:700; color:var(--color-accent-hi);
+  letter-spacing:-.028em; line-height:1.18; margin-bottom:18px;
+}
+[data-theme="dark"] .hero h1 { color:var(--color-accent) }
+.hero-when {
+  display:inline-flex; align-items:center; gap:9px;
+  padding:5px 16px; border-radius:20px;
+  background:var(--color-mark-dim);
+  border:1px solid color-mix(in srgb, var(--color-mark) 28%, transparent);
+  font-family:var(--font-sans); font-size:12.5px; font-weight:700;
+  color:var(--color-mark); letter-spacing:.03em; margin-bottom:20px;
+}
+.hero-when-dot { width:6px; height:6px; border-radius:50%; background:var(--color-mark); animation:blink 2.4s ease-in-out infinite }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.22} }
+.hero-authors { font-size:19px; font-weight:600; color:var(--color-text-1); line-height:1.7; margin-bottom:6px }
+.hero-authors a { color:var(--color-text-1) }
+.hero-authors a:hover { color:var(--color-accent) }
+.hero-affils { font-family:var(--font-sans); font-size:13px; color:var(--color-text-4); margin-bottom:32px }
+.hero-btns { display:flex; align-items:center; justify-content:center; gap:9px; flex-wrap:wrap }
+.btn {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:9px 21px; border-radius:24px;
+  font-family:var(--font-sans); font-size:13.5px; font-weight:600;
+  border:1px solid transparent; cursor:pointer; transition:all .18s;
+}
+.btn:hover { text-decoration:none }
+.btn-primary { background:var(--color-accent); color:#fff }
+[data-theme="dark"] .btn-primary { color:#0b0f18 }
+.btn-primary:hover { background:var(--color-accent-hi); color:#fff }
+[data-theme="dark"] .btn-primary:hover { color:#0b0f18 }
+.btn-ghost { background:transparent; border-color:var(--color-border-2); color:var(--color-text-2) }
+.btn-ghost:hover { background:var(--color-bg-2); color:var(--color-text-1) }
+
+/* ─── PAGE LAYOUT ────────────────────────────────────────── */
+.page {
+  max-width: calc(var(--measure) + var(--toc-width) + 86px);
+  margin:0 auto; padding:0 30px 104px;
+  display:grid; grid-template-columns: var(--toc-width) 1fr;
+  gap:0 54px; align-items:start;
+}
+@media(max-width:1020px) { .page { grid-template-columns:1fr; gap:0 } .toc { display:none } }
+@media(max-width:640px)  { .page { padding:0 18px 72px } }
+
+/* ─── TOC ────────────────────────────────────────────────── */
+.toc {
+  position:sticky; top:calc(var(--nav-height) + 26px);
+  padding:34px 0 0;
+  max-height:calc(100vh - var(--nav-height) - 52px); overflow-y:auto;
+  opacity:0; transform:translateY(8px);
+  transition:opacity .4s ease, transform .4s ease;
+}
+.toc.ready { opacity:1; transform:translateY(0) }
+.toc-label {
+  font-family:var(--font-sans); font-size:10px; font-weight:800;
+  letter-spacing:.13em; text-transform:uppercase;
+  color:var(--color-text-5); margin-bottom:12px;
+}
+.toc a {
+  display:block; font-family:var(--font-sans); font-size:12.5px;
+  color:var(--color-text-4); padding:4px 0 4px 12px;
+  border-left:2px solid transparent; transition:all .15s; line-height:1.4;
+}
+.toc a:hover { color:var(--color-text-2); text-decoration:none }
+.toc a.active { color:var(--color-text-1); border-left-color:var(--color-mark); font-weight:700 }
+
+/* ─── ARTICLE ────────────────────────────────────────────── */
+.article { min-width:0; padding:46px 0 0 }
+.article section { margin-bottom:74px }
+.section-title {
+  font-family:var(--font-serif);
+  font-size:29px; font-weight:700; color:var(--color-mark);
+  letter-spacing:-.026em; line-height:1.2;
+  text-align:center; margin-bottom:8px;
+}
+.section-rule {
+  width:52px; height:2px; margin:0 auto 26px;
+  background:var(--color-mark); opacity:.45; border-radius:2px;
+}
+.article h3 {
+  font-family:var(--font-sans);
+  font-size:18px; font-weight:700;
+  color:var(--color-accent-hi); letter-spacing:-.012em;
+  margin:38px 0 11px;
+}
+[data-theme="dark"] .article h3 { color:var(--color-accent) }
+.article p { margin-bottom:19px }
+.article p:last-child { margin-bottom:0 }
+.article strong { color:var(--color-text-1); font-weight:600 }
+.article hr {
+  border:none; height:1px; margin:64px 0;
+  background:linear-gradient(90deg, transparent, var(--color-border-2), transparent);
+}
+
+
+/* ─── SCHEDULE ───────────────────────────────────────────── */
+.sched-meta {
+  display:flex; gap:10px 20px; justify-content:center; flex-wrap:wrap;
+  font-family:var(--font-sans); font-size:12.5px; color:var(--color-text-4);
+  margin-bottom:26px;
+}
+.sched-meta b { color:var(--color-text-2); font-weight:700 }
+.part {
+  position:relative;
+  background:var(--color-bg-1); border:1px solid var(--color-border);
+  border-radius:16px; padding:22px 24px 20px 26px; margin-bottom:14px;
+  overflow:hidden; transition:border-color .2s, transform .25s, box-shadow .25s;
+}
+.part:hover { border-color:var(--color-border-2); transform:translateY(-2px); box-shadow:var(--shadow-card) }
+.part::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--color-accent) }
+.part.is-panel::before { background:var(--color-mark) }
+.part-head { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:4px }
+.part-tag {
+  font-family:var(--font-mono); font-size:11px; font-weight:600;
+  color:var(--color-text-4); letter-spacing:.04em;
+  border:1px solid var(--color-border-2); border-radius:5px; padding:1px 7px;
+}
+.part-name {
+  font-family:var(--font-sans); font-size:17px; font-weight:800;
+  color:var(--color-accent-hi); letter-spacing:-.015em;
+}
+[data-theme="dark"] .part-name { color:var(--color-accent) }
+.part.is-panel .part-name { color:var(--color-mark) }
+.dur {
+  font-family:var(--font-mono); font-size:13px; font-weight:600;
+  color:var(--color-time);
+}
+.part-items { list-style:none; margin:10px 0 0 }
+.part-items li {
+  font-size:15px; color:var(--color-text-2); line-height:1.7;
+  padding-left:16px; position:relative;
+}
+.part-items li::before {
+  content:''; position:absolute; left:0; top:11px;
+  width:5px; height:5px; border-radius:1px; background:var(--color-text-5);
+}
+.part-role {
+  font-family:var(--font-sans); font-size:13px; color:var(--color-text-3);
+  margin-top:11px; line-height:1.7;
+}
+.part-role .role-k { color:var(--color-text-4) }
+.part-role b { color:var(--color-text-1); font-weight:700 }
+.sched-note {
+  font-family:var(--font-sans); font-size:12.5px; font-style:italic;
+  color:var(--color-text-4); margin-top:16px; text-align:center;
+}
+
+/* ─── TOPIC CARDS ────────────────────────────────────────── */
+.topics { display:grid; grid-template-columns:1fr 1fr; gap:13px; margin-top:26px }
+@media(max-width:680px) { .topics { grid-template-columns:1fr } }
+.topic {
+  background:var(--color-bg-1); border:1px solid var(--color-border);
+  border-radius:14px; padding:19px 18px;
+  transition:border-color .2s, transform .25s, box-shadow .25s;
+}
+.topic:hover { border-color:var(--color-border-2); transform:translateY(-2px); box-shadow:var(--shadow-card) }
+.topic-name {
+  font-family:var(--font-sans); font-size:14.5px; font-weight:800;
+  color:var(--color-accent-hi); letter-spacing:-.012em;
+  line-height:1.35; margin-bottom:10px;
+}
+[data-theme="dark"] .topic-name { color:var(--color-accent) }
+.topic ul { list-style:none }
+.topic li {
+  font-family:var(--font-sans); font-size:13.5px; color:var(--color-text-3);
+  line-height:1.6; padding:3px 0 3px 15px; position:relative;
+}
+.topic li::before {
+  content:''; position:absolute; left:0; top:12px;
+  width:5px; height:5px; border-radius:1px;
+  background:var(--color-accent); opacity:.55;
+}
+.topic li b { color:var(--color-text-2); font-weight:700 }
+.topic-panel {
+  grid-column:1 / -1;
+  background:var(--color-mark-dim);
+  border-color:color-mix(in srgb, var(--color-mark) 30%, transparent);
+  text-align:center;
+}
+.topic-panel .topic-name { color:var(--color-mark); margin-bottom:4px; font-size:15.5px }
+.topic-panel p { font-family:var(--font-sans); font-size:13px; color:var(--color-text-3); margin:0 }
+
+/* ─── PREREQUISITES ──────────────────────────────────────── */
+.prereq {
+  background:var(--color-bg-1); border:1px solid var(--color-border);
+  border-left:3px solid var(--color-accent);
+  border-radius:0 14px 14px 0; padding:20px 24px; margin:26px 0;
+}
+.prereq-label {
+  font-family:var(--font-sans); font-size:10.5px; font-weight:800;
+  letter-spacing:.13em; text-transform:uppercase;
+  color:var(--color-accent); margin-bottom:9px;
+}
+.prereq p { font-size:15.5px; line-height:1.75; margin:0 }
+
+/* ─── REFERENCE GROUPS ───────────────────────────────────── */
+.refgroup { margin-bottom:22px }
+.refgroup-name {
+  font-family:var(--font-sans); font-size:14.5px; font-weight:800;
+  color:var(--color-text-1); margin-bottom:8px;
+  padding-bottom:6px; border-bottom:1px solid var(--color-border);
+}
+.refgroup ul { list-style:none }
+.refgroup li {
+  font-size:15px; color:var(--color-text-3); line-height:1.72;
+  padding:4px 0 4px 16px; position:relative;
+}
+.refgroup li::before {
+  content:''; position:absolute; left:0; top:14px;
+  width:5px; height:5px; border-radius:1px;
+  background:var(--color-mark); opacity:.5;
+}
+.refgroup .kind {
+  font-family:var(--font-sans); font-size:12px; font-weight:700;
+  color:var(--color-text-4); text-transform:uppercase; letter-spacing:.05em;
+}
+.by { color:var(--color-text-4); font-size:14px }
+.refgroup li a { font-weight:600 }
+
+/* ─── FULL BIBLIOGRAPHY ──────────────────────────────────── */
+.bib-head {
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:14px; flex-wrap:wrap; margin:34px 0 0;
+}
+.bib-toggle {
+  display:inline-flex; align-items:center; gap:7px;
+  background:transparent; border:1px solid var(--color-border-2); color:var(--color-text-3);
+  font-family:var(--font-sans); font-size:13px; font-weight:600;
+  padding:8px 18px; border-radius:22px; cursor:pointer; transition:all .18s;
+}
+.bib-toggle:hover { background:var(--color-bg-2); color:var(--color-text-1) }
+#bib-body { display:none; margin-top:16px }
+#bib-body.open { display:block }
+.bib {
+  display:flex; gap:12px; padding:9px 0;
+  font-family:var(--font-sans); font-size:13px;
+  color:var(--color-text-3); line-height:1.62;
+  border-bottom:1px solid var(--color-border);
+  scroll-margin-top:calc(var(--nav-height) + 40px);
+}
+.bib:last-child { border-bottom:none }
+.bib:target { background:var(--color-accent-dim); border-radius:8px; padding-left:8px; padding-right:8px }
+.bib-n {
+  flex-shrink:0; width:32px; text-align:right;
+  font-family:var(--font-mono); font-size:11.5px; color:var(--color-text-5); padding-top:1px;
+}
+.bib-b em { color:var(--color-text-4); font-style:italic }
+.bib-b b { color:var(--color-text-2); font-weight:700 }
+
+/* ─── CONTACT ────────────────────────────────────────────── */
+.contact-box {
+  background:var(--color-bg-1); border:1px solid var(--color-border);
+  border-radius:16px; padding:26px; margin-top:22px; text-align:center;
+}
+.contact-mails {
+  display:flex; gap:10px 26px; justify-content:center; flex-wrap:wrap;
+  font-family:var(--font-mono); font-size:14.5px; font-weight:500; margin-top:6px;
+}
+
+/* ─── FOOTER ─────────────────────────────────────────────── */
+footer {
+  background:var(--color-bg-1); border-top:1px solid var(--color-border);
+  padding:46px 30px; text-align:center;
+}
+.footer-logo { font-family:var(--font-serif); font-size:19px; font-weight:700; color:var(--color-text-1); margin-bottom:8px }
+.footer-sub { font-family:var(--font-sans); font-size:13px; color:var(--color-text-4); line-height:1.7; margin-bottom:20px }
+.footer-links { display:flex; gap:19px; justify-content:center; flex-wrap:wrap }
+.footer-links a { font-family:var(--font-sans); font-size:13px; color:var(--color-text-4) }
+.footer-links a:hover { color:var(--color-accent) }
+
+/* ─── FADE-IN ────────────────────────────────────────────── */
+.reveal { opacity:0; transform:translateY(20px); transition:opacity .7s ease, transform .7s ease }
+.reveal.on { opacity:1; transform:translateY(0) }
+
+/* ─── THEME TOGGLE ───────────────────────────────────────── */
+#theme-toggle {
+  position:fixed; bottom:26px; right:26px; z-index:999;
+  width:44px; height:44px; border-radius:50%;
+  border:1px solid var(--color-border-2); background:var(--color-bg-1); color:var(--color-text-1);
+  font-size:19px; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:var(--shadow-card);
+  transition:background .2s, border-color .2s, transform .15s;
+}
+#theme-toggle:hover { transform:scale(1.1); background:var(--color-bg-2) }
+
+/* ─── READING PROGRESS ───────────────────────────────────── */
+#read-progress {
+  position:fixed; top:0; left:0; z-index:300;
+  height:2px; width:0%; pointer-events:none;
+  background:linear-gradient(90deg, var(--color-accent) 0%, var(--color-mark) 100%);
+  transition:width .08s linear;
+}
+</style>
+</head>
+<body>
+<div id="read-progress"></div>
+<button id="theme-toggle" onclick="toggleTheme()" title="Toggle light and dark mode" aria-label="Toggle light and dark mode">🌙</button>
+
+<!-- ══════════════════════════════════════════════════════════
+     NAV
+════════════════════════════════════════════════════════════ -->
+<nav class="nav">
+  <a class="nav-brand" href="#top">
+    <img src="assets/logo.png" alt="">
+    <span class="nav-brand-text">
+      NeurIPS'26 Tutorial
+      <span>RL for Agentic-AI</span>
+    </span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-a" href="#top">Home</a>
+    <a class="nav-a" href="#overview">Overview</a>
+    <a class="nav-a" href="#schedule">Schedule</a>
+    <a class="nav-a" href="#content">Tutorial Content</a>
+    <a class="nav-a" href="#audience">Audience</a>
+    <a class="nav-a" href="#references">References</a>
+    <a class="nav-a" href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════════════════ -->
+<header class="hero" id="top">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <h1>From Heuristics to Guarantees:<br>Bandit and RL Blueprint for Reliable Agentic-AI</h1>
+
+    <div class="hero-when"><span class="hero-when-dot"></span>NeurIPS 2026 &nbsp;·&nbsp; Preferred sites: Sydney, Atlanta</div>
+
+    <div class="hero-authors">
+      <a href="https://aadirupa.github.io/" target="_blank" rel="noopener">Aadirupa Saha</a>,
+      <a href="https://arunv3rma.github.io/" target="_blank" rel="noopener">Arun Verma</a>,
+      <a href="https://scholar.google.com/citations?user=i2a1LUMAAAAJ" target="_blank" rel="noopener">Djallel Bouneffouf</a>
+    </div>
+    <div class="hero-affils">
+      University of Illinois Chicago &nbsp;·&nbsp; SMART Centre, Singapore &nbsp;·&nbsp; IBM Research
+    </div>
+
+    <div class="hero-btns">
+      <a class="btn btn-primary" href="#schedule">Schedule</a>
+      <a class="btn btn-ghost" href="#content">Tutorial Content</a>
+      <a class="btn btn-ghost" href="#references">References</a>
+      <a class="btn btn-ghost" href="#contact">Contact</a>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE
+════════════════════════════════════════════════════════════ -->
+<div class="page">
+
+  <aside class="toc" id="toc">
+    <div class="toc-label">On this page</div>
+    <a href="#overview">Tutorial Overview</a>
+    <a href="#schedule">Schedule</a>
+    <a href="#content">Tutorial Content</a>
+    <a href="#audience">Target Audience</a>
+    <a href="#references">Some References</a>
+    <a href="#contact">Contact</a>
+  </aside>
+
+  <main class="article">
+
+    <!-- ── OVERVIEW ── -->
+    <section id="overview" class="reveal">
+      <h2 class="section-title">Tutorial Overview</h2>
+      <div class="section-rule"></div>
+
+      <p>
+        From customer support agents to coding copilots, agentic AI systems must make decisions under
+        uncertainty while relying on noisy, delayed, and expensive feedback, precisely the settings
+        for which decades of research in bandits and reinforcement learning (RL) have developed
+        principled methods. Yet many of these decisions are still driven by ad hoc heuristics rather
+        than principled methods.
+      </p>
+      <p>
+        This tutorial presents a unified view of agentic AI through the lens of sequential
+        decision-making. We show that five core challenges, Model Selection, Self-Improvement,
+        Adaptation and Personalization, Orchestration, and Alignment with Human Feedback, share a
+        common formal structure. For each challenge, we provide an explicit bandit or RL formulation,
+        together with the corresponding algorithmic toolbox and theoretical foundations. By bridging
+        bandit and RL theory with modern agentic AI, our goal is to promote principled, reliable, and
+        scalable solutions for the next generation of intelligent systems.
+      </p>
+
+    </section>
+
+    <hr>
+
+    <!-- ── SCHEDULE ── -->
+    <section id="schedule" class="reveal">
+      <h2 class="section-title">Schedule</h2>
+      <div class="section-rule"></div>
+
+      <div class="sched-meta">
+        <span><b>Total:</b> 150 minutes</span>
+        <span><b>Main content:</b> 110 minutes</span>
+        <span><b>Preferred sites:</b> Sydney, Atlanta</span>
+      </div>
+
+      <div class="part">
+        <div class="part-head">
+          <span class="part-tag">0 – 10</span>
+          <span class="part-name">Motivation</span>
+          <span class="dur">(10m)</span>
+        </div>
+        <ul class="part-items">
+          <li>Motivation and running examples</li>
+        </ul>
+      </div>
+
+      <div class="part">
+        <div class="part-head">
+          <span class="part-tag">10 – 25</span>
+          <span class="part-name">Primer</span>
+          <span class="dur">(15m)</span>
+        </div>
+        <ul class="part-items">
+          <li>Multi-armed, contextual, and dueling bandit models, and the RL formulation</li>
+        </ul>
+      </div>
+
+      <div class="part">
+        <div class="part-head">
+          <span class="part-tag">25 – 95</span>
+          <span class="part-name">The Five Core Problems</span>
+          <span class="dur">(roughly 14m each)</span>
+        </div>
+        <ul class="part-items">
+          <li>Model Selection</li>
+          <li>Self-Improvement</li>
+          <li>Adaptation and Personalization</li>
+          <li>Orchestration &amp; Multi-Agent Coordination</li>
+          <li>Alignment with Human Feedback</li>
+        </ul>
+      </div>
+
+      <div class="part">
+        <div class="part-head">
+          <span class="part-tag">95 – 110</span>
+          <span class="part-name">Hands-On Demonstrations and Open Problems</span>
+          <span class="dur">(15m)</span>
+        </div>
+      </div>
+
+      <div class="part">
+        <div class="part-head">
+          <span class="part-tag">110 – 120</span>
+          <span class="part-name">Questions &amp; Answers</span>
+          <span class="dur">(10m)</span>
+        </div>
+      </div>
+
+      <div class="part is-panel">
+        <div class="part-head">
+          <span class="part-tag">120 – 150</span>
+          <span class="part-name">Panel: Principled vs. Heuristic Agentic-AI</span>
+          <span class="dur">(30m)</span>
+        </div>
+        <div class="part-role">
+          <span class="role-k">[Panel, alphabetically:</span>
+          <b>Sham Kakade</b> (tentative), <b>Adam Kalai</b>, <b>Branislav Kveton</b>,
+          <b>John Langford</b>, <b>Armando Solar-Lezama</b>, <b>Paul Liang</b><span class="role-k">]</span>
+        </div>
+      </div>
+
+      <p class="sched-note">(*schedule is tentative)</p>
+    </section>
+
+    <hr>
+
+    <!-- ── TUTORIAL CONTENT ── -->
+    <section id="content" class="reveal">
+      <h2 class="section-title">Tutorial Content</h2>
+      <div class="section-rule"></div>
+
+      <p>
+        The tutorial moves from motivation and formal groundwork through the five agentic problem
+        threads, closing with runnable demonstrations, open problems, and a panel.
+      </p>
+
+      <div class="topics">
+
+        <div class="topic">
+          <div class="topic-name">Motivation: Sequential Decision-Making in Agentic AI</div>
+          <ul>
+            <li>Everyday agents: customer support, travel planning, coding copilots</li>
+            <li>Why heuristics fall short: noisy, delayed, expensive feedback</li>
+            <li>The LLM and Bandit/RL convergence</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <div class="topic-name">Formalism Primer</div>
+          <ul>
+            <li>Multi-armed, Contextual, and Dueling Bandits</li>
+            <li>MDPs and POMDPs</li>
+            <li>Regret, Sample Complexity, and Safe Exploration</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <div class="topic-name">Tool and Model Selection</div>
+          <ul>
+            <li>Routing as a Contextual Bandit (quality and cost trade-off)</li>
+            <li>Bandits with Knapsacks under Budget Constraints</li>
+            <li>Dueling Bandits under Pairwise Quality Judgments</li>
+            <li><b>Systems:</b> RouteLLM, FrugalGPT</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <div class="topic-name">Self-Improvement</div>
+          <ul>
+            <li>Best-Arm Identification over Prompts and Configurations</li>
+            <li>Label-Free Dueling Bandits with LLM Judges</li>
+            <li>Prompt Revision as an MDP</li>
+            <li><b>Systems:</b> OPRO, ProTeGi, TRIPLE</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <div class="topic-name">Adaptation and Personalization</div>
+          <ul>
+            <li>Contextual Bandits over User/Session Features</li>
+            <li>Dueling Bandits under Relative Preferences</li>
+            <li>Off-Policy Evaluation for Safe Personalization</li>
+            <li>The Non-Myopic MDP View of Evolving User Models</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <div class="topic-name">Orchestration and Multi-Agent Coordination</div>
+          <ul>
+            <li>Step-Level Contextual Bandits</li>
+            <li>MDPs and POMDPs under Sparse, Terminal Rewards</li>
+            <li>Credit Assignment Across Long Horizons</li>
+            <li>MCTS/UCT, Policy Gradient, and Actor-Critic</li>
+            <li><b>Systems:</b> ReAct, Reflexion, Tree of Thoughts, AFlow</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <div class="topic-name">Human Preference Feedback and Alignment</div>
+          <ul>
+            <li>Contextual Dueling Bandits under Bradley-Terry Models</li>
+            <li>Constrained and Game-Theoretic Nash Variants</li>
+            <li>KL-Regularized RLHF with PPO</li>
+            <li>DPO as Reparameterized Supervised Learning</li>
+            <li>Nash Preference Games and Multiplayer Optimization</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <div class="topic-name">Hands-on Demos &amp; Open Problems</div>
+          <ul>
+            <li>Model Routing as a Contextual Bandit</li>
+            <li>Prompt Optimization as Best-Arm Identification</li>
+            <li>RLHF/DPO under Bradley-Terry-Luce (BTL) Preferences</li>
+            <li><b>Open Problems:</b> Safe Exploration, Credit Assignment, Personalization at Scale</li>
+          </ul>
+        </div>
+
+        <div class="topic topic-panel">
+          <div class="topic-name">Panel Discussion: Principled vs. Heuristic Agent Design</div>
+          <p>Closing the session with the practitioners and theorists who live on both sides of the gap.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- ── AUDIENCE ── -->
+    <section id="audience" class="reveal">
+      <h2 class="section-title">Target Audience (Prerequisites)</h2>
+      <div class="section-rule"></div>
+
+      <p>
+        The tutorial targets LLM-agent practitioners seeking principled design, and bandit, RL, and
+        optimization theorists seeking high-impact applications. Given agentic AI's prominence, we
+        anticipate 300 to 500 attendees.
+      </p>
+
+      <div class="prereq">
+        <div class="prereq-label">Prerequisites</div>
+        <p>
+          Basic probability and machine learning suffice. Advanced material, such as regret proofs
+          and game-theoretic formulations, is clearly separated from the main narrative.
+        </p>
+      </div>
+
+      <p>
+        A further goal is to foster collaboration across the applied and theory communities in
+        agentic AI and sequential decision-making, including bandit and RL theory, learning from
+        human feedback, multi-agent systems, optimization, trustworthy AI, and human-AI interaction.
+        Our panelists and organizers reflect diversity across gender, nationality, and institution,
+        and the tutorial spans techniques from ML, RL, LLMs, statistics, optimization, game theory,
+        robotics, and operations research to engage a wide audience.
+      </p>
+    </section>
+
+    <hr>
+
+    <!-- ── REFERENCES ── -->
+    <section id="references" class="reveal">
+      <h2 class="section-title">Some References</h2>
+      <div class="section-rule"></div>
+
+      <p>
+        Existing tutorials cover individual pieces in isolation. Ours treats tool and model
+        selection, self-improvement, adaptation, orchestration, and preference-based alignment as
+        <em>threads of a single story</em>, foregrounding the emerging work that maps LLM and agent
+        design onto bandit and RL formulations.
+      </p>
+
+      <div class="refgroup">
+        <div class="refgroup-name">Surveys and Foundational Reading</div>
+        <ul>
+          <li>
+            <b>LLM and Bandit/RL connections:</b>
+            <a href="https://arxiv.org/abs/2601.12945" target="_blank" rel="noopener">A Component-Based Survey of Interactions between LLMs and Multi-Armed Bandits</a>
+          </li>
+          <li>
+            <b>Dueling and preference-based learning:</b>
+            <a href="https://www.ijcai.org/proceedings/2018/776" target="_blank" rel="noopener">Advancements in Dueling Bandits</a>,
+            <a href="https://jmlr.org/papers/v22/18-546.html" target="_blank" rel="noopener">Preference-Based Online Learning with Dueling Bandits</a>,
+            <a href="https://www.jmlr.org/papers/v18/16-634.html" target="_blank" rel="noopener">A Survey of Preference-Based RL Methods</a>
+          </li>
+          <li>
+            <b>Contextual bandits:</b>
+            <a href="https://arxiv.org/abs/1003.0146" target="_blank" rel="noopener">LinUCB</a>,
+            <a href="https://arxiv.org/abs/1703.00048" target="_blank" rel="noopener">generalized linear contextual bandits</a>,
+            <a href="https://proceedings.neurips.cc/paper/2011/hash/e1d5be1c7f2f456670de3d53c7b54f4a-Abstract.html" target="_blank" rel="noopener">improved linear stochastic bandits</a>
+          </li>
+          <li>
+            <b>Thompson sampling</b>
+            <a href="https://arxiv.org/abs/1111.1797" target="_blank" rel="noopener">(Agrawal and Goyal, 2012)</a>
+            and <b>bandits with knapsacks</b>
+            <a href="https://arxiv.org/abs/1305.2545" target="_blank" rel="noopener">(Badanidiyuru et al., 2018)</a>
+          </li>
+          <li>
+            <b>Best-arm identification:</b>
+            <a href="https://proceedings.mlr.press/v28/karnin13.html" target="_blank" rel="noopener">Almost Optimal Exploration</a>,
+            <a href="https://arxiv.org/abs/1312.7308" target="_blank" rel="noopener">lil' UCB</a>
+          </li>
+          <li>
+            <b>RLHF and alignment foundations:</b>
+            <a href="https://arxiv.org/abs/1706.03741" target="_blank" rel="noopener">Deep RL from Human Preferences</a>,
+            <a href="https://arxiv.org/abs/2203.02155" target="_blank" rel="noopener">InstructGPT</a>,
+            <a href="https://arxiv.org/abs/2305.18290" target="_blank" rel="noopener">DPO</a>,
+            <a href="https://arxiv.org/abs/2312.00886" target="_blank" rel="noopener">Nash Learning from Human Feedback</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="refgroup">
+        <div class="refgroup-name">Agentic Systems and Benchmarks</div>
+        <ul>
+          <li>
+            <b>Routers:</b>
+            <a href="https://arxiv.org/abs/2406.18665" target="_blank" rel="noopener">RouteLLM</a>,
+            <a href="https://arxiv.org/abs/2305.05176" target="_blank" rel="noopener">FrugalGPT</a>,
+            <a href="https://arxiv.org/abs/2508.21141" target="_blank" rel="noopener">PILOT</a>
+          </li>
+          <li>
+            <b>Prompt optimizers:</b>
+            <a href="https://arxiv.org/abs/2211.01910" target="_blank" rel="noopener">APE</a>,
+            <a href="https://arxiv.org/abs/2309.03409" target="_blank" rel="noopener">OPRO</a>,
+            <a href="https://arxiv.org/abs/2305.03495" target="_blank" rel="noopener">ProTeGi</a>,
+            <a href="https://arxiv.org/abs/2402.09723" target="_blank" rel="noopener">TRIPLE</a>,
+            <a href="https://arxiv.org/abs/2310.02905" target="_blank" rel="noopener">INSTINCT</a>,
+            <a href="https://arxiv.org/abs/2405.17346" target="_blank" rel="noopener">APOHF</a>
+          </li>
+          <li>
+            <b>Reasoning and orchestration agents:</b>
+            <a href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener">ReAct</a>,
+            <a href="https://arxiv.org/abs/2303.11366" target="_blank" rel="noopener">Reflexion</a>,
+            <a href="https://arxiv.org/abs/2305.10601" target="_blank" rel="noopener">Tree of Thoughts</a>,
+            <a href="https://arxiv.org/abs/2410.10762" target="_blank" rel="noopener">AFlow</a>,
+            <a href="https://arxiv.org/abs/2511.21689" target="_blank" rel="noopener">ToolOrchestra</a>,
+            <a href="https://arxiv.org/abs/2603.02630" target="_blank" rel="noopener">MASPOB</a>
+          </li>
+          <li>
+            <b>Benchmarks:</b>
+            <a href="https://arxiv.org/abs/2406.12045" target="_blank" rel="noopener">&tau;-bench</a>,
+            <a href="https://arxiv.org/abs/2402.01622" target="_blank" rel="noopener">TravelPlanner</a>,
+            <a href="https://arxiv.org/abs/2310.06770" target="_blank" rel="noopener">SWE-bench</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="refgroup">
+        <div class="refgroup-name">Related Tutorials</div>
+        <ul>
+          <li><a href="https://sites.google.com/view/pref-learning-tutorial-neurips/home" target="_blank" rel="noopener">Do You Prefer Learning with Preferences?</a> <span class="by">NeurIPS 2023</span></li>
+          <li><a href="https://neurips.cc/virtual/2024/tutorial/99529" target="_blank" rel="noopener">Cross-Disciplinary Insights into Alignment in Humans and Machines</a> <span class="by">NeurIPS 2024</span></li>
+          <li><a href="https://neurips.cc/virtual/2024/tutorial/99525" target="_blank" rel="noopener">Generating Programmatic Solutions</a> <span class="by">NeurIPS 2024</span></li>
+          <li><a href="https://dl.acm.org/doi/10.1145/3637528.3671440" target="_blank" rel="noopener">Multi-Armed Bandit Applications for Large Language Models</a> <span class="by">KDD 2024</span></li>
+          <li><a href="https://research.ibm.com/publications/bandits-llms-and-agentic-ai" target="_blank" rel="noopener">Bandits, LLMs, and Agentic AI</a> <span class="by">AAAI 2026</span></li>
+        </ul>
+      </div>
+
+      <div class="bib-head">
+        <h3 style="margin:0">Full bibliography</h3>
+        <button class="bib-toggle" onclick="toggleBib(this)">Show all 53 references</button>
+      </div>
+
+      <div id="bib-body">
+        <div class="bib" id="r1"><div class="bib-n">[1]</div><div class="bib-b">Shunyu Yao, Noah Shinn, Pedram Razavi, and Karthik Narasimhan. <b><a href="https://arxiv.org/abs/2406.12045" target="_blank" rel="noopener">&tau;-bench: A benchmark for tool-agent-user interaction in real-world domains.</a></b> <em>Proc. ICLR</em>, 2025.</div></div>
+        <div class="bib" id="r2"><div class="bib-n">[2]</div><div class="bib-b">Jian Xie, Kai Zhang, Jiangjie Chen, Tinghui Zhu, Renze Lou, Yuandong Tian, Yanghua Xiao, and Yu Su. <b><a href="https://arxiv.org/abs/2402.01622" target="_blank" rel="noopener">TravelPlanner: A benchmark for real-world planning with language agents.</a></b> <em>Proc. ICML</em>, 2024.</div></div>
+        <div class="bib" id="r3"><div class="bib-n">[3]</div><div class="bib-b">Carlos E. Jimenez, John Yang, Alexander Wettig, Shunyu Yao, Kexin Pei, Ofir Press, and Karthik Narasimhan. <b><a href="https://arxiv.org/abs/2310.06770" target="_blank" rel="noopener">SWE-bench: Can language models resolve real-world GitHub issues?</a></b> <em>Proc. ICLR</em>, 2024.</div></div>
+        <div class="bib" id="r4"><div class="bib-n">[4]</div><div class="bib-b">Siguang Chen, Chunli Lv, and Miao Xie. <b>A component-based survey of interactions between large language models and multi-armed bandits.</b> <em><a href="https://arxiv.org/abs/2601.12945" target="_blank" rel="noopener">arXiv:2601.12945</a></em>, 2026.</div></div>
+        <div class="bib" id="r5"><div class="bib-n">[5]</div><div class="bib-b">Y. Abbasi-Yadkori, D. Pal, and C. Szepesvari. <b><a href="https://proceedings.neurips.cc/paper/2011/hash/e1d5be1c7f2f456670de3d53c7b54f4a-Abstract.html" target="_blank" rel="noopener">Improved algorithms for linear stochastic bandits.</a></b> <em>Proc. NeurIPS</em>, 2011.</div></div>
+        <div class="bib" id="r6"><div class="bib-n">[6]</div><div class="bib-b">Lihong Li, Yu Lu, and Dengyong Zhou. <b><a href="https://arxiv.org/abs/1703.00048" target="_blank" rel="noopener">Provably optimal algorithms for generalized linear contextual bandits.</a></b> <em>Proc. ICML</em>, pages 2071–2080, 2017.</div></div>
+        <div class="bib" id="r7"><div class="bib-n">[7]</div><div class="bib-b">Shipra Agrawal and Navin Goyal. <b><a href="https://arxiv.org/abs/1111.1797" target="_blank" rel="noopener">Analysis of Thompson sampling for the multi-armed bandit problem.</a></b> <em>Proc. COLT</em>, pages 39–1, 2012.</div></div>
+        <div class="bib" id="r8"><div class="bib-n">[8]</div><div class="bib-b">Ashwinkumar Badanidiyuru, Robert Kleinberg, and Aleksandrs Slivkins. <b><a href="https://arxiv.org/abs/1305.2545" target="_blank" rel="noopener">Bandits with knapsacks.</a></b> <em>Journal of the ACM</em>, 65(3):1–55, 2018.</div></div>
+        <div class="bib" id="r9"><div class="bib-n">[9]</div><div class="bib-b">Isaac Ong, Amjad Almahairi, Vincent Wu, Wei-Lin Chiang, Tianhao Wu, Joseph E. Gonzalez, M. Waleed Kadous, and Ion Stoica. <b><a href="https://arxiv.org/abs/2406.18665" target="_blank" rel="noopener">RouteLLM: Learning to route LLMs with preference data.</a></b> <em>Proc. ICLR</em>, 2025.</div></div>
+        <div class="bib" id="r10"><div class="bib-n">[10]</div><div class="bib-b">Lingjiao Chen, Matei Zaharia, and James Zou. <b>FrugalGPT: How to use large language models while reducing cost and improving performance.</b> <em><a href="https://arxiv.org/abs/2305.05176" target="_blank" rel="noopener">arXiv:2305.05176</a></em>, 2023.</div></div>
+        <div class="bib" id="r11"><div class="bib-n">[11]</div><div class="bib-b">Pranoy Panda, Raghav Magazine, Chaitanya Devaguptapu, Sho Takemori, and Vishal Sharma. <b>Adaptive LLM routing under budget constraints.</b> <em><a href="https://arxiv.org/abs/2508.21141" target="_blank" rel="noopener">arXiv:2508.21141</a></em>, 2025.</div></div>
+        <div class="bib" id="r12"><div class="bib-n">[12]</div><div class="bib-b">Jean-Yves Audibert and Sébastien Bubeck. <b>Best arm identification in multi-armed bandits.</b> <em>Proc. COLT</em>, pages 13–p, 2010.</div></div>
+        <div class="bib" id="r13"><div class="bib-n">[13]</div><div class="bib-b">Zohar Karnin, Tomer Koren, and Oren Somekh. <b><a href="https://proceedings.mlr.press/v28/karnin13.html" target="_blank" rel="noopener">Almost optimal exploration in multi-armed bandits.</a></b> <em>Proc. ICML</em>, pages 1238–1246, 2013.</div></div>
+        <div class="bib" id="r14"><div class="bib-n">[14]</div><div class="bib-b">Kevin Jamieson, Matthew Malloy, Robert Nowak, and Sebastien Bubeck. <b><a href="https://arxiv.org/abs/1312.7308" target="_blank" rel="noopener">lil' UCB: An optimal exploration algorithm for multi-armed bandits.</a></b> <em>Proc. COLT</em>, pages 423–439, 2014.</div></div>
+        <div class="bib" id="r15"><div class="bib-n">[15]</div><div class="bib-b">Yongchao Zhou, Andrei Ioan Muresanu, Ziwen Han, Keiran Paster, Silviu Pitis, Harris Chan, and Jimmy Ba. <b><a href="https://arxiv.org/abs/2211.01910" target="_blank" rel="noopener">Large language models are human-level prompt engineers.</a></b> <em>Proc. ICLR</em>, 2023.</div></div>
+        <div class="bib" id="r16"><div class="bib-n">[16]</div><div class="bib-b">Chengrun Yang, Xuezhi Wang, Yifeng Lu, Hanxiao Liu, Quoc V. Le, Denny Zhou, and Xinyun Chen. <b><a href="https://arxiv.org/abs/2309.03409" target="_blank" rel="noopener">Large language models as optimizers.</a></b> <em>Proc. ICLR</em>, 2024.</div></div>
+        <div class="bib" id="r17"><div class="bib-n">[17]</div><div class="bib-b">Reid Pryzant, Dan Iter, Jerry Li, Yin Tat Lee, Chenguang Zhu, and Michael Zeng. <b><a href="https://arxiv.org/abs/2305.03495" target="_blank" rel="noopener">Automatic prompt optimization with "gradient descent" and beam search.</a></b> <em>Proc. EMNLP</em>, 2023.</div></div>
+        <div class="bib" id="r18"><div class="bib-n">[18]</div><div class="bib-b">Chengshuai Shi, Kun Yang, Zihan Chen, Jundong Li, Jing Yang, and Cong Shen. <b><a href="https://arxiv.org/abs/2402.09723" target="_blank" rel="noopener">Efficient prompt optimization through the lens of best arm identification.</a></b> <em>Proc. NeurIPS</em>, 2024.</div></div>
+        <div class="bib" id="r19"><div class="bib-n">[19]</div><div class="bib-b">Yuanchen Wu, Saurabh Verma, Justin Lee, Fangzhou Xiong, Poppy Zhang, Amel Awadelkarim, Xu Chen, Yubai Yuan, and Shawndra Hill. <b>LLM prompt duel optimizer: Efficient label-free prompt optimization.</b> <em><a href="https://arxiv.org/abs/2510.13907" target="_blank" rel="noopener">arXiv:2510.13907</a></em>, 2026.</div></div>
+        <div class="bib" id="r20"><div class="bib-n">[20]</div><div class="bib-b">Lihong Li, Wei Chu, John Langford, and Robert E. Schapire. <b><a href="https://arxiv.org/abs/1003.0146" target="_blank" rel="noopener">A contextual-bandit approach to personalized news article recommendation.</a></b> <em>Proc. WWW</em>, pages 661–670, 2010.</div></div>
+        <div class="bib" id="r21"><div class="bib-n">[21]</div><div class="bib-b">Anikait Singh, Sheryl Hsu, Kyle Hsu, Eric Mitchell, Stefano Ermon, Tatsunori Hashimoto, Archit Sharma, and Chelsea Finn. <b>FSPO: Few-shot optimization of synthetic preferences personalizes to real users.</b> <em><a href="https://arxiv.org/abs/2502.19312" target="_blank" rel="noopener">arXiv:2502.19312</a></em>, 2025.</div></div>
+        <div class="bib" id="r22"><div class="bib-n">[22]</div><div class="bib-b">Zikun Qu, Min Zhang, Mingze Kong, Xiang Li, Zhiwei Shang, Zhiyong Wang, Yikun Ban, Shuang Qiu, Yao Shu, and Zhongxiang Dai. <b>T-POP: Test-time personalization with online preference feedback.</b> <em>Proc. ICML</em>, 2026. <a href="https://arxiv.org/abs/2509.24696" target="_blank" rel="noopener">arXiv:2509.24696</a>.</div></div>
+        <div class="bib" id="r23"><div class="bib-n">[23]</div><div class="bib-b">Linfeng Du, Ye Yuan, Zichen Zhao, Fuyuan Lyu, Emiliano Penaloza, Xiuying Chen, Zipeng Sun, Jikun Kang, Laurent Charlin, Xue Liu, and Haolun Wu. <b>Optimizing user profiles via contextual bandits for retrieval-augmented LLM personalization.</b> <em><a href="https://arxiv.org/abs/2601.12078" target="_blank" rel="noopener">arXiv:2601.12078</a></em>, 2026.</div></div>
+        <div class="bib" id="r24"><div class="bib-n">[24]</div><div class="bib-b">Rémi Coulom. <b>Efficient selectivity and backup operators in Monte-Carlo tree search.</b> <em>International Conference on Computers and Games (CG)</em>, pages 72–83, 2006.</div></div>
+        <div class="bib" id="r25"><div class="bib-n">[25]</div><div class="bib-b">Levente Kocsis and Csaba Szepesvári. <b>Bandit based Monte-Carlo planning.</b> <em>ECML</em>, pages 282–293, 2006.</div></div>
+        <div class="bib" id="r26"><div class="bib-n">[26]</div><div class="bib-b">David Silver, Aja Huang, Chris J. Maddison, Arthur Guez, Laurent Sifre, George Van Den Driessche, Julian Schrittwieser, Ioannis Antonoglou, Veda Panneershelvam, Marc Lanctot, et al. <b><a href="https://www.nature.com/articles/nature16961" target="_blank" rel="noopener">Mastering the game of Go with deep neural networks and tree search.</a></b> <em>Nature</em>, 529(7587):484–489, 2016.</div></div>
+        <div class="bib" id="r27"><div class="bib-n">[27]</div><div class="bib-b">Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, and Yuan Cao. <b><a href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener">ReAct: Synergizing reasoning and acting in language models.</a></b> <em>Proc. ICLR</em>, 2023.</div></div>
+        <div class="bib" id="r28"><div class="bib-n">[28]</div><div class="bib-b">Noah Shinn, Federico Cassano, Ashwin Gopinath, Karthik Narasimhan, and Shunyu Yao. <b><a href="https://arxiv.org/abs/2303.11366" target="_blank" rel="noopener">Reflexion: Language agents with verbal reinforcement learning.</a></b> <em>Proc. NeurIPS</em>, 2023.</div></div>
+        <div class="bib" id="r29"><div class="bib-n">[29]</div><div class="bib-b">Shunyu Yao, Dian Yu, Jeffrey Zhao, Izhak Shafran, Tom Griffiths, Yuan Cao, and Karthik Narasimhan. <b><a href="https://arxiv.org/abs/2305.10601" target="_blank" rel="noopener">Tree of thoughts: Deliberate problem solving with large language models.</a></b> <em>Proc. NeurIPS</em>, 2023.</div></div>
+        <div class="bib" id="r30"><div class="bib-n">[30]</div><div class="bib-b">Yifei Zhou, Andrea Zanette, Jiayi Pan, Sergey Levine, and Aviral Kumar. <b><a href="https://arxiv.org/abs/2402.19446" target="_blank" rel="noopener">ArCHer: Training language model agents via hierarchical multi-turn RL.</a></b> <em>Proc. ICML</em>, 2024.</div></div>
+        <div class="bib" id="r31"><div class="bib-n">[31]</div><div class="bib-b">Yifei Zhou, Song Jiang, Yuandong Tian, Jason Weston, Sergey Levine, Sainbayar Sukhbaatar, and Xian Li. <b>SWEET-RL: Training multi-turn LLM agents on collaborative reasoning tasks.</b> <em><a href="https://arxiv.org/abs/2503.15478" target="_blank" rel="noopener">arXiv:2503.15478</a></em>, 2025.</div></div>
+        <div class="bib" id="r32"><div class="bib-n">[32]</div><div class="bib-b">Quan Wei, Siliang Zeng, Chenliang Li, William Brown, Oana Frunza, Wei Deng, Anderson Schneider, Yuriy Nevmyvaka, Yang Katie Zhao, Alfredo Garcia, and Mingyi Hong. <b>Reinforcing multi-turn reasoning in LLM agents via turn-level reward design.</b> <em><a href="https://arxiv.org/abs/2505.11821" target="_blank" rel="noopener">arXiv:2505.11821</a></em>, 2025.</div></div>
+        <div class="bib" id="r33"><div class="bib-n">[33]</div><div class="bib-b">Jiayi Zhang, Jinyu Xiang, Zhaoyang Yu, Fengwei Teng, Xionghui Chen, Jiaqi Chen, Mingchen Zhuge, Xin Cheng, Sirui Hong, Jinlin Wang, et al. <b><a href="https://arxiv.org/abs/2410.10762" target="_blank" rel="noopener">AFlow: Automating agentic workflow generation.</a></b> <em>Proc. ICLR</em>, 2025.</div></div>
+        <div class="bib" id="r34"><div class="bib-n">[34]</div><div class="bib-b">Aadirupa Saha and Pierre Gaillard. <b><a href="https://arxiv.org/abs/2107.02274" target="_blank" rel="noopener">Dueling bandits with adversarial sleeping.</a></b> <em>Proc. NeurIPS</em>, 2021.</div></div>
+        <div class="bib" id="r35"><div class="bib-n">[35]</div><div class="bib-b">Miroslav Dudík, Katja Hofmann, Robert E. Schapire, Aleksandrs Slivkins, and Masrour Zoghi. <b><a href="https://arxiv.org/abs/1502.06362" target="_blank" rel="noopener">Contextual dueling bandits.</a></b> <em>Proc. COLT</em>, pages 563–587, 2015.</div></div>
+        <div class="bib" id="r36"><div class="bib-n">[36]</div><div class="bib-b">Erdem Biyik and Dorsa Sadigh. <b><a href="https://arxiv.org/abs/1810.04303" target="_blank" rel="noopener">Batch active preference-based learning of reward functions.</a></b> <em>Proc. CoRL</em>, pages 519–528, 2018.</div></div>
+        <div class="bib" id="r37"><div class="bib-n">[37]</div><div class="bib-b">Paul F. Christiano, Jan Leike, Tom Brown, Miljan Martic, Shane Legg, and Dario Amodei. <b><a href="https://arxiv.org/abs/1706.03741" target="_blank" rel="noopener">Deep reinforcement learning from human preferences.</a></b> <em>Proc. NeurIPS</em>, 2017.</div></div>
+        <div class="bib" id="r38"><div class="bib-n">[38]</div><div class="bib-b">Long Ouyang, Jeffrey Wu, Xu Jiang, Diogo Almeida, Carroll Wainwright, Pamela Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, et al. <b><a href="https://arxiv.org/abs/2203.02155" target="_blank" rel="noopener">Training language models to follow instructions with human feedback.</a></b> <em>Proc. NeurIPS</em>, 2022.</div></div>
+        <div class="bib" id="r39"><div class="bib-n">[39]</div><div class="bib-b">Rafael Rafailov, Archit Sharma, Eric Mitchell, Christopher D. Manning, Stefano Ermon, and Chelsea Finn. <b><a href="https://arxiv.org/abs/2305.18290" target="_blank" rel="noopener">Direct preference optimization: Your language model is secretly a reward model.</a></b> <em>Proc. NeurIPS</em>, 2023.</div></div>
+        <div class="bib" id="r40"><div class="bib-n">[40]</div><div class="bib-b">Rémi Munos, Michal Valko, Daniele Calandriello, Mohammad Gheshlaghi Azar, Mark Rowland, Zhaohan Daniel Guo, Yunhao Tang, Matthieu Geist, Thomas Mesnard, Andrea Michi, et al. <b><a href="https://arxiv.org/abs/2312.00886" target="_blank" rel="noopener">Nash learning from human feedback.</a></b> <em>Proc. ICML</em>, 2024.</div></div>
+        <div class="bib" id="r41"><div class="bib-n">[41]</div><div class="bib-b">Fang Wu, Xu Huang, Weihao Xuan, Zhiwei Zhang, Yijia Xiao, Guancheng Wan, Xiaomin Li, Bing Hu, Peng Xia, Jure Leskovec, and Yejin Choi. <b>Multiplayer Nash preference optimization.</b> <em><a href="https://arxiv.org/abs/2509.23102" target="_blank" rel="noopener">arXiv:2509.23102</a></em>, 2025.</div></div>
+        <div class="bib" id="r42"><div class="bib-n">[42]</div><div class="bib-b">Aadirupa Saha and Aditya Gopalan. <b>Do you prefer learning with preferences?</b> Tutorial at NeurIPS 2023, New Orleans, December 11, 2023. <a href="https://sites.google.com/view/pref-learning-tutorial-neurips/home" target="_blank" rel="noopener">Website</a>.</div></div>
+        <div class="bib" id="r43"><div class="bib-n">[43]</div><div class="bib-b">Gillian Hadfield, Dylan Hadfield-Menell, Joel Leibo, and Rakshit Trivedi. <b>Cross-disciplinary insights into alignment in humans and machines.</b> Tutorial at NeurIPS 2024, Vancouver, December 10, 2024. <a href="https://neurips.cc/virtual/2024/tutorial/99529" target="_blank" rel="noopener">Website</a>.</div></div>
+        <div class="bib" id="r44"><div class="bib-n">[44]</div><div class="bib-b">Levi Lelis, Xinyun Chen, and Shao-Hua Sun. <b>Generating programmatic solutions: Algorithms and applications of programmatic reinforcement learning and code generation.</b> Tutorial at NeurIPS 2024, Vancouver, December 10, 2024. <a href="https://neurips.cc/virtual/2024/tutorial/99525" target="_blank" rel="noopener">Website</a>.</div></div>
+        <div class="bib" id="r45"><div class="bib-n">[45]</div><div class="bib-b">Djallel Bouneffouf and Raphaël Féraud. <b><a href="https://dl.acm.org/doi/10.1145/3637528.3671440" target="_blank" rel="noopener">A tutorial on multi-armed bandit applications for large language models.</a></b> <em>Proc. KDD</em>, 2024.</div></div>
+        <div class="bib" id="r46"><div class="bib-n">[46]</div><div class="bib-b">Djallel Bouneffouf and Raphaël Féraud. <b><a href="https://research.ibm.com/publications/bandits-llms-and-agentic-ai" target="_blank" rel="noopener">Multi-armed bandits meet large language models.</a></b> <em>Proc. AAAI</em>, 2026.</div></div>
+        <div class="bib" id="r47"><div class="bib-n">[47]</div><div class="bib-b">Yanan Sui, Masrour Zoghi, Katja Hofmann, and Yisong Yue. <b><a href="https://www.ijcai.org/proceedings/2018/776" target="_blank" rel="noopener">Advancements in dueling bandits.</a></b> <em>Proc. IJCAI</em>, pages 5502–5510, 2018.</div></div>
+        <div class="bib" id="r48"><div class="bib-n">[48]</div><div class="bib-b">Viktor Bengs, Róbert Busa-Fekete, Adil El Mesaoudi-Paul, and Eyke Hüllermeier. <b><a href="https://jmlr.org/papers/v22/18-546.html" target="_blank" rel="noopener">Preference-based online learning with dueling bandits: A survey.</a></b> <em>JMLR</em>, 2021.</div></div>
+        <div class="bib" id="r49"><div class="bib-n">[49]</div><div class="bib-b">Christian Wirth, Riad Akrour, Gerhard Neumann, and Johannes Fürnkranz. <b><a href="https://www.jmlr.org/papers/v18/16-634.html" target="_blank" rel="noopener">A survey of preference-based reinforcement learning methods.</a></b> <em>JMLR</em>, pages 4945–4990, 2017.</div></div>
+        <div class="bib" id="r50"><div class="bib-n">[50]</div><div class="bib-b">Xiaoqiang Lin, Zhaoxuan Wu, Zhongxiang Dai, Wenyang Hu, Yao Shu, See-Kiong Ng, Patrick Jaillet, and Bryan Kian Hsiang Low. <b><a href="https://arxiv.org/abs/2310.02905" target="_blank" rel="noopener">Use your INSTINCT: Instruction optimization for LLMs using neural bandits coupled with transformers.</a></b> <em>Proc. ICML</em>, pages 30317–30345, 2024.</div></div>
+        <div class="bib" id="r51"><div class="bib-n">[51]</div><div class="bib-b">Xiaoqiang Lin, Zhongxiang Dai, Arun Verma, See-Kiong Ng, Patrick Jaillet, and Bryan Kian Hsiang Low. <b><a href="https://arxiv.org/abs/2405.17346" target="_blank" rel="noopener">Prompt optimization with human feedback.</a></b> <em>ICML Workshop on Models of Human Feedback for AI Alignment</em>, 2024.</div></div>
+        <div class="bib" id="r52"><div class="bib-n">[52]</div><div class="bib-b">Hongjin Su, Shizhe Diao, Ximing Lu, Mingjie Liu, Jiacheng Xu, Xin Dong, Yonggan Fu, Peter Belcak, Hanrong Ye, Hongxu Yin, et al. <b>ToolOrchestra: Elevating intelligence via efficient model and tool orchestration.</b> <em><a href="https://arxiv.org/abs/2511.21689" target="_blank" rel="noopener">arXiv:2511.21689</a></em>, 2025.</div></div>
+        <div class="bib" id="r53"><div class="bib-n">[53]</div><div class="bib-b">Zhi Hong, Qian Zhang, Jiahang Sun, Zhiwei Shang, Mingze Kong, Xiangyi Wang, Yao Shu, and Zhongxiang Dai. <b>MASPOB: Bandit-based prompt optimization for multi-agent systems with graph neural networks.</b> <em><a href="https://arxiv.org/abs/2603.02630" target="_blank" rel="noopener">arXiv:2603.02630</a></em>, 2026.</div></div>
+      </div>
+    </section>
+
+    <!-- ── CONTACT ── -->
+    <section id="contact" class="reveal">
+      <h2 class="section-title">Contact</h2>
+      <div class="section-rule"></div>
+
+      <div class="contact-box">
+        <p style="margin-bottom:6px">Questions about the tutorial are welcome. Write to either of us.</p>
+        <div class="contact-mails">
+          <a href="mailto:aadirupa@uic.edu">aadirupa@uic.edu</a>
+          <a href="mailto:arun.verma@smart.mit.edu">arun.verma@smart.mit.edu</a>
+          <a href="mailto:djallel.bouneffouf@ibm.com">djallel.bouneffouf@ibm.com</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-logo">From Heuristics to Guarantees</div>
+  <div class="footer-sub">
+    Bandit and RL Blueprint for Reliable Agentic-AI<br>
+    NeurIPS 2026 Tutorial &nbsp;·&nbsp; Aadirupa Saha, Arun Verma, Djallel Bouneffouf
+  </div>
+  <div class="footer-links">
+    <a href="#overview">Overview</a>
+    <a href="#schedule">Schedule</a>
+    <a href="#content">Tutorial Content</a>
+    <a href="#audience">Audience</a>
+    <a href="#references">References</a>
+    <a href="#contact">Contact</a>
+  </div>
+</footer>
+
+<script>
+/* ── Reveal on scroll ── */
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('on'); revealObs.unobserve(e.target) }
+  })
+}, { threshold: 0.05, rootMargin: '0px 0px -48px 0px' })
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el))
+
+/* ── TOC show + active section ── */
+const toc = document.getElementById('toc')
+setTimeout(() => toc && toc.classList.add('ready'), 400)
+
+const tocLinks = document.querySelectorAll('.toc a')
+const sections = document.querySelectorAll('.article section[id]')
+const tocObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocLinks.forEach(l => l.classList.remove('active'))
+      const a = document.querySelector(`.toc a[href="#${e.target.id}"]`)
+      if (a) a.classList.add('active')
+    }
+  })
+}, { rootMargin: '-12% 0px -72% 0px' })
+sections.forEach(s => tocObs.observe(s))
+
+/* ── Full bibliography expand ── */
+function setBib(open) {
+  const body = document.getElementById('bib-body')
+  const btn  = document.querySelector('.bib-toggle')
+  body.classList.toggle('open', open)
+  btn.textContent = open ? 'Hide references' : 'Show all 53 references'
+}
+function toggleBib() { setBib(!document.getElementById('bib-body').classList.contains('open')) }
+
+if (location.hash.match(/^#r\d+$/)) {
+  window.addEventListener('load', () => {
+    setBib(true)
+    const t = document.querySelector(location.hash)
+    if (t) t.scrollIntoView({ block:'center' })
+  })
+}
+
+/* ── Initial reveal for above-fold items ── */
+window.addEventListener('load', () => {
+  document.querySelectorAll('.reveal').forEach(el => {
+    if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('on')
+  })
+})
+
+/* ── Reading progress ── */
+;(function() {
+  const bar = document.getElementById('read-progress')
+  if (!bar) return
+  window.addEventListener('scroll', () => {
+    const total = document.documentElement.scrollHeight - window.innerHeight
+    bar.style.width = (total > 0 ? Math.min(window.scrollY / total * 100, 100) : 0) + '%'
+  }, { passive: true })
+})()
+
+/* ── Theme toggle (light is the default here, matching the reference site) ── */
+function toggleTheme() {
+  const html = document.documentElement
+  const isDark = html.getAttribute('data-theme') === 'dark'
+  const next = isDark ? 'light' : 'dark'
+  html.setAttribute('data-theme', next)
+  localStorage.setItem('sample-theme', next)
+  document.getElementById('theme-toggle').textContent = isDark ? '🌙' : '☀️'
+}
+;(function() {
+  if (localStorage.getItem('sample-theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('theme-toggle').textContent = '☀️'
+    })
+  }
+})()
+</script>
+</body>
+</html>
