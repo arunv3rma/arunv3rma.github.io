@@ -5,67 +5,83 @@
   <title>Blogs - Arun Verma</title>
   <meta name="author" content="Arun Verma">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#1d1e22" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1012" media="(prefers-color-scheme: dark)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&display=swap">
   <link rel="stylesheet" type="text/css" href="stylesheet.css">
   <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <script src="site.js" defer></script>
 </head>
 
 <body>
 
-  <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-
-    <tr style="padding:0px">
-      <td class="page-content">
+  <div class="page">
 
         <!-- Navigation -->
-        <nav class="main-nav">
+        <nav class="main-nav" aria-label="Main">
           <div class="nav-links">
             <a href="index.html" class="nav-home">Homepage</a>
             <a href="research.html">Research</a>
             <a href="publications.html">Publications</a>
             <a href="experience.html">Experience</a>
-            <a href="blogs.html" class="active">Blogs</a>
+            <a href="blogs.html" class="active" aria-current="page">Blogs</a>
             <a href="teaching.html">Teaching</a>
             <a href="services.html">Services</a>
             <a href="talks.html">Talks</a>
             <a href="awards.html">Awards</a>
             <a href="news.html">News</a>
           </div>
-          <button class="nav-toggle" type="button" aria-label="Toggle menu">
+          <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
             <span></span><span></span><span></span>
           </button>
         </nav>
 
-        <div class="inner-content">
-        <div id="blogs" style="width:100%;margin-top:0px;padding:0px;">
+        <main class="inner-content">
+        <div id="blogs">
           <heading>Blogs</heading>
           <hr>
-          <ul class="sel-papers" style="display:flex;flex-direction:column;gap:8px;">
-            <li class="sel-paper" style="background:#fdf8f8;">
-              <div class="sel-paper-title" style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;">
-                <a href="blogs/memo" target="_blank">MeMo: Memory as a Model</a>
-                <span class="news-date" style="flex-shrink:0;">May 2026</span>
-              </div>
-              <div class="sel-paper-authors" style="margin-top:6px;font-size:14px;color:var(--text-secondary);line-height:1.6;">
-                MeMo augments any LLM with up-to-date or domain-specific knowledge via a trained memory model, avoiding costly retraining, mitigating catastrophic forgetting, and remaining robust to retrieval noise.
+          <ul class="blog-list">
+            <li class="blog-card">
+              <div class="blog-thumb"><img src="images/thumb-memo.png" alt="" width="161" height="192" loading="lazy"></div>
+              <div>
+                <div class="blog-head">
+                  <div class="blog-title"><a href="blogs/memo" target="_blank">MeMo: Memory as a Model</a></div>
+                  <span class="news-date">May 2026</span>
+                </div>
+                <p class="blog-desc">
+                  MeMo augments any LLM with up-to-date or domain-specific knowledge via a trained memory model, avoiding costly retraining, mitigating catastrophic forgetting, and remaining robust to retrieval noise.
+                </p>
               </div>
             </li>
-            <li class="sel-paper" style="background:#fdf8f8;">
-              <div class="sel-paper-title" style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;">
-                <a href="blogs/minedraft" target="_blank">MineDraft: A Framework for Batch Parallel Speculative Decoding</a>
-                <span class="news-date" style="flex-shrink:0;">Mar 2026</span>
-              </div>
-              <div class="sel-paper-authors" style="margin-top:6px;font-size:14px;color:var(--text-secondary);line-height:1.6;">
-                MineDraft accelerates large language model inference by overlapping the drafting and verification stages of speculative decoding, hiding latency and unlocking substantial throughput gains in batch settings.
+            <li class="blog-card">
+              <div class="blog-thumb"><img src="images/thumb-minedraft.png" alt="" width="192" height="192" loading="lazy"></div>
+              <div>
+                <div class="blog-head">
+                  <div class="blog-title"><a href="blogs/minedraft" target="_blank">MineDraft: A Framework for Batch Parallel Speculative Decoding</a></div>
+                  <span class="news-date">Mar 2026</span>
+                </div>
+                <p class="blog-desc">
+                  MineDraft accelerates large language model inference by overlapping the drafting and verification stages of speculative decoding, hiding latency and unlocking substantial throughput gains in batch settings.
+                </p>
               </div>
             </li>
           </ul>
         </div>
-        </div>
 
-      </td>
-    </tr>
+        </main><!-- /.inner-content -->
 
-  </tbody></table>
+        <!-- Footer -->
+        <footer class="site-footer">
+          <p>
+            &copy; 2026 Arun Verma
+            &nbsp;·&nbsp; Last updated: 13 Oct 2026.
+          </p>
+        </footer>
+
+  </div>
 
 </body>
 </html>

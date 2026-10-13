@@ -5,19 +5,23 @@
   <title>News - Arun Verma</title>
   <meta name="author" content="Arun Verma">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#1d1e22" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1012" media="(prefers-color-scheme: dark)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&display=swap">
   <link rel="stylesheet" type="text/css" href="stylesheet.css">
   <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <script src="site.js" defer></script>
 </head>
 
 <body>
 
-  <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-
-    <tr style="padding:0px">
-      <td class="page-content">
+  <div class="page">
 
         <!-- Navigation -->
-        <nav class="main-nav">
+        <nav class="main-nav" aria-label="Main">
           <div class="nav-links">
             <a href="index.html" class="nav-home">Homepage</a>
             <a href="research.html">Research</a>
@@ -28,16 +32,16 @@
             <a href="services.html">Services</a>
             <a href="talks.html">Talks</a>
             <a href="awards.html">Awards</a>
-            <a href="news.html" class="active">News</a>
+            <a href="news.html" class="active" aria-current="page">News</a>
           </div>
-          <button class="nav-toggle" type="button" aria-label="Toggle menu">
+          <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
             <span></span><span></span><span></span>
           </button>
         </nav>
 
-        <div class="inner-content">
+        <main class="inner-content">
 
-          <div style="margin-top:0px;">
+          <div>
             <heading>News</heading>
             <hr>
             <ul class="news-list">
@@ -45,7 +49,7 @@
               <!-- 2026 -->
               <li>
                 <span class="news-date">Sep 2026</span>
-                <span><a href="https://arxiv.org/pdf/2602.20102" target="_blank">BarrierSteer</a> and Contextual Flow Matching accepted at NeurIPS 2026; <a href="https://arxiv.org/pdf/2609.01573" target="_blank">SFT–RL Budget Allocation</a> accepted at NeurIPS 2026 Workshop.</span>
+                <span><a href="https://arxiv.org/pdf/2602.20102" target="_blank">BarrierSteer</a> and <a href="https://arxiv.org/pdf/2610.03202" target="_blank">Contextual Flow Matching</a> accepted at NeurIPS 2026; <a href="https://arxiv.org/pdf/2609.01573" target="_blank">SFT–RL Budget Allocation</a> accepted at NeurIPS 2026 Workshop.</span>
               </li>
               <li>
                 <span class="news-date">Sep 2026</span>
@@ -61,7 +65,7 @@
               </li>
               <li>
                 <span class="news-date">Jul 2026</span>
-                <span><a href="https://openreview.net/pdf?id=NHe6guO3l6" target="_blank">MMT: Immediate Exact Federated Unlearning</a> accepted at Machine Learning Journal (ECML PKDD 2026 Journal Track).</span>
+                <span><a href="https://link.springer.com/article/10.1007/s10994-026-07117-8" target="_blank">MMT: Immediate Exact Federated Unlearning</a> accepted at Machine Learning Journal (ECML PKDD 2026 Journal Track).</span>
               </li>
               <li>
                 <span class="news-date">May 2026</span>
@@ -121,33 +125,24 @@
               </li>
               <li>
                 <span class="news-date">Sep 2024</span>
-                <span>Joined the M3S team at SMART Centre as a Postdoctoral Associate, working with Daniela Rus (MIT), Armando Solar-Lezama (MIT), and Bryan Low (NUS).
-
-.</span>
+                <span>Joined the M3S team at SMART Centre as a Postdoctoral Associate, working with Daniela Rus (MIT), Armando Solar-Lezama (MIT), and Bryan Low (NUS).</span>
               </li>
 
             </ul>
           </div>
 
-        </div><!-- /.inner-content -->
+        </main><!-- /.inner-content -->
 
         <!-- Footer -->
-        <div class="site-footer">
+        <footer class="site-footer">
           <p>
             &copy; 2026 Arun Verma
-            &nbsp;·&nbsp; Last updated: 8 Oct 2026.
+            &nbsp;·&nbsp; Last updated: 13 Oct 2026.
           </p>
-        </div>
+        </footer>
 
-      </td>
-    </tr>
-  </table>
+  </div>
 
-<script>
-document.querySelector('.nav-toggle').addEventListener('click', function() {
-  document.querySelector('.main-nav').classList.toggle('nav-open');
-});
-</script>
 </body>
 
 </html>

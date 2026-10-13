@@ -5,24 +5,28 @@
   <title>Experience - Arun Verma</title>
   <meta name="author" content="Arun Verma">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#1d1e22" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1012" media="(prefers-color-scheme: dark)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&display=swap">
   <link rel="stylesheet" type="text/css" href="stylesheet.css">
   <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <script src="site.js" defer></script>
 </head>
 
 <body>
 
-  <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-
-    <tr style="padding:0px">
-      <td class="page-content">
+  <div class="page">
 
         <!-- Navigation -->
-        <nav class="main-nav">
+        <nav class="main-nav" aria-label="Main">
           <div class="nav-links">
             <a href="index.html" class="nav-home">Homepage</a>
             <a href="research.html">Research</a>
             <a href="publications.html">Publications</a>
-            <a href="experience.html" class="active">Experience</a>
+            <a href="experience.html" class="active" aria-current="page">Experience</a>
             <a href="blogs.html">Blogs</a>
             <a href="teaching.html">Teaching</a>
             <a href="services.html">Services</a>
@@ -30,13 +34,13 @@
             <a href="awards.html">Awards</a>
             <a href="news.html">News</a>
           </div>
-          <button class="nav-toggle" type="button" aria-label="Toggle menu">
+          <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
             <span></span><span></span><span></span>
           </button>
         </nav>
 
-        <div class="inner-content">
-        <div id="experience" style="width:100%;margin-top:0px;padding:0px;display:inline-block">
+        <main class="inner-content">
+        <div id="experience">
           <heading>Work Experience</heading>
           <hr>
 
@@ -151,25 +155,18 @@
           </div>
 
         </div>
-        </div><!-- /.inner-content -->
+        </main><!-- /.inner-content -->
 
         <!-- Footer -->
-        <div class="site-footer">
+        <footer class="site-footer">
           <p>
             &copy; 2026 Arun Verma
-            &nbsp;·&nbsp; Last updated: 8 Oct 2026. 
+            &nbsp;·&nbsp; Last updated: 13 Oct 2026. 
           </p>
-        </div>
+        </footer>
 
-      </td>
-    </tr>
-  </table>
+  </div>
 
-<script>
-document.querySelector('.nav-toggle').addEventListener('click', function() {
-  document.querySelector('.main-nav').classList.toggle('nav-open');
-});
-</script>
 </body>
 
 </html>

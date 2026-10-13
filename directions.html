@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Research Directions - Arun Verma</title>
+  <meta name="author" content="Arun Verma">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#1d1e22" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1012" media="(prefers-color-scheme: dark)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&display=swap">
+  <link rel="stylesheet" type="text/css" href="stylesheet.css">
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <script src="site.js" defer></script>
+</head>
+
+<body>
+
+  <div class="page">
+
+        <!-- Navigation -->
+        <nav class="main-nav" aria-label="Main">
+          <div class="nav-links">
+            <a href="index.html" class="nav-home">Homepage</a>
+            <a href="research.html" class="active">Research</a>
+            <a href="publications.html">Publications</a>
+            <a href="experience.html">Experience</a>
+            <a href="blogs.html">Blogs</a>
+            <a href="teaching.html">Teaching</a>
+            <a href="services.html">Services</a>
+            <a href="talks.html">Talks</a>
+            <a href="awards.html">Awards</a>
+            <a href="news.html">News</a>
+          </div>
+          <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
+        </nav>
+
+        <main class="inner-content">
+
+          <!-- Research Directions -->
+          <div>
+            <heading>Research Directions <a class="heading-link" href="research.html">← Research overview</a></heading>
+            <hr>
+
+            <article class="res-card area-adaptive" id="adaptive-ai">
+              <div class="res-card-header">
+                <div class="res-card-icon-wrap">
+                  <svg class="res-card-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6"/>
+                    <path d="M2.5 12A10 10 0 0 1 18.5 4.3L21.5 8"/>
+                    <path d="M2.5 22v-6h6"/>
+                    <path d="M21.5 12A10 10 0 0 1 5.5 19.7L2.5 16"/>
+                  </svg>
+                </div>
+                <div class="res-card-heading">
+                  <div class="res-card-subtitle">Direction 1 &middot; Adaptive AI</div>
+                  <h3 class="res-card-title">Models that keep learning after deployment</h3>
+                </div>
+              </div>
+              <div class="res-card-body">
+                <p>Deployed models face shifting data, new knowledge, and evolving user preferences, yet retraining a foundation model each time is slow and costly. I study how AI systems can adapt continually from new information and feedback without forgetting what they already know. <a href="blogs/memo" target="_blank">MeMo</a> encodes new or domain-specific knowledge into a dedicated memory model that any frozen LLM can query at inference time, avoiding retraining and catastrophic forgetting. Adaptation also means forgetting on request: MMT achieves immediate, exact unlearning in federated learning while improving post-unlearning performance.</p>
+                <p>On the feedback side, I develop neural dueling bandit algorithms that learn from human preferences and actively choose which feedback to collect, with applications to prompt optimisation and sample-efficient alignment (ActiveDPO). These build on my foundations in sequential decision-making: bandit and Bayesian optimisation algorithms that remain sample-efficient under delayed, censored, or auxiliary feedback.</p>
+              </div>
+              <div class="res-tags">
+                <span class="res-tag">Continual Learning</span>
+                <span class="res-tag">Memory-Augmented LLMs</span>
+                <span class="res-tag">Machine Unlearning</span>
+                <span class="res-tag">Learning from Human Feedback</span>
+                <span class="res-tag">Bandits &amp; Bayesian Optimisation</span>
+              </div>
+            </article>
+
+            <article class="res-card area-trust" id="trustworthy-ai">
+              <div class="res-card-header">
+                <div class="res-card-icon-wrap">
+                  <svg class="res-card-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                  </svg>
+                </div>
+                <div class="res-card-heading">
+                  <div class="res-card-subtitle">Direction 2 &middot; Trustworthy AI</div>
+                  <h3 class="res-card-title">Reliable behaviour when the stakes are high</h3>
+                </div>
+              </div>
+              <div class="res-card-body">
+                <p>In high-stakes settings, a model must know when it is uncertain, stay within safety constraints, and treat the people it affects fairly. My work examines how prompts shape the uncertainty of LLM responses, so that confidence can be measured rather than assumed. <a href="https://arxiv.org/pdf/2602.20102" target="_blank">BarrierSteer</a> treats hidden-state safety classifiers as control barrier functions and steers generation away from unsafe trajectories at inference time, combining multiple safety constraints without changing the model&rsquo;s parameters.</p>
+                <p>When AI serves many stakeholders, I design algorithms with provable fairness and incentive guarantees: online fair division of many items with few copies, contextual bandits that keep strategic agents truthful (COBRA), and time-aware fairness in collaborative data sharing. Risk-aware reinforcement learning with coherent risk measures extends these guarantees to sequential decisions.</p>
+              </div>
+              <div class="res-tags">
+                <span class="res-tag">Uncertainty Quantification</span>
+                <span class="res-tag">LLM Safety</span>
+                <span class="res-tag">Control Barrier Functions</span>
+                <span class="res-tag">Fairness &amp; Incentives</span>
+                <span class="res-tag">Risk-Aware RL</span>
+              </div>
+            </article>
+
+            <article class="res-card area-efficient" id="resource-efficient-ai">
+              <div class="res-card-header">
+                <div class="res-card-icon-wrap">
+                  <svg class="res-card-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                </div>
+                <div class="res-card-heading">
+                  <div class="res-card-subtitle">Direction 3 &middot; Resource-Efficient AI</div>
+                  <h3 class="res-card-title">Doing more with less compute and data</h3>
+                </div>
+              </div>
+              <div class="res-card-body">
+                <p>Large models are expensive to run and to train, which limits where they can be deployed. For inference, I develop methods that spend compute only where it is needed: TETRIS selects the most useful draft tokens for batch speculative decoding, <a href="blogs/minedraft" target="_blank">MineDraft</a> overlaps drafting and verification to hide latency, and Contextual Flow Matching chooses the number of generation steps per prompt, speeding up image and video generation by over 2.5&times; without retraining the base model.</p>
+                <p>For training, I study how to split a limited annotation budget between supervised fine-tuning and reinforcement learning, showing that near-optimal allocations found on small models transfer to large ones. I also argue that scaling laws can be uncovered more cheaply by framing them as inverse problems.</p>
+              </div>
+              <div class="res-tags">
+                <span class="res-tag">Speculative Decoding</span>
+                <span class="res-tag">Efficient Inference</span>
+                <span class="res-tag">Adaptive Computation</span>
+                <span class="res-tag">Annotation Budgets</span>
+                <span class="res-tag">Scaling Laws</span>
+              </div>
+            </article>
+
+            <div class="res-mas-banner"><span class="res-mas-label">Unified through Modular AI Systems</span></div>
+
+            <article class="res-card" id="modular-ai-systems">
+              <div class="res-card-header">
+                <div class="res-card-icon-wrap">
+                  <svg class="res-card-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                    <polyline points="2 17 12 22 22 17"/>
+                    <polyline points="2 12 12 17 22 12"/>
+                  </svg>
+                </div>
+                <div class="res-card-heading">
+                  <div class="res-card-subtitle">Unifying Framework</div>
+                  <h3 class="res-card-title">Modular AI Systems (MAS)</h3>
+                </div>
+              </div>
+              <div class="res-card-body">
+                <p>A Modular AI System pairs a shared foundation-model core with lightweight, independently configurable modules, so each concern is handled where it arises rather than by retraining the whole model. A memory module absorbs new knowledge, a barrier module enforces safety constraints, and draft models or step-selection policies reduce the cost of generation.</p>
+                <p>Several of my recent projects already take this form, as plug-in components that leave the core model&rsquo;s parameters untouched: MeMo for adaptation, BarrierSteer for trustworthiness, and MineDraft and Contextual Flow Matching for efficiency. The aim is to make such modules composable, so that adaptiveness, reliability, and efficiency can be tuned independently for each deployment.</p>
+              </div>
+              <div class="res-tags">
+                <span class="res-tag">Shared Core</span>
+                <span class="res-tag">Plug-in Modules</span>
+                <span class="res-tag">Inference-Time Control</span>
+                <span class="res-tag">Composability</span>
+              </div>
+            </article>
+          </div>
+
+        </main><!-- /.inner-content -->
+
+        <!-- Footer -->
+        <footer class="site-footer">
+          <p>
+            &copy; 2026 Arun Verma
+            &nbsp;·&nbsp; Last updated: 13 Oct 2026.
+          </p>
+        </footer>
+
+  </div>
+
+</body>
+</html>

@@ -5,19 +5,23 @@
   <title>Awards - Arun Verma</title>
   <meta name="author" content="Arun Verma">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#1d1e22" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1012" media="(prefers-color-scheme: dark)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&display=swap">
   <link rel="stylesheet" type="text/css" href="stylesheet.css">
   <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <script src="site.js" defer></script>
 </head>
 
 <body>
 
-  <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-      
-    <tr style="padding:0px">
-      <td class="page-content">
+  <div class="page">
 
         <!-- Navigation -->
-        <nav class="main-nav">
+        <nav class="main-nav" aria-label="Main">
           <div class="nav-links">
             <a href="index.html" class="nav-home">Homepage</a>
             <a href="research.html">Research</a>
@@ -27,97 +31,84 @@
             <a href="teaching.html">Teaching</a>
             <a href="services.html">Services</a>
             <a href="talks.html">Talks</a>
-            <a href="awards.html" class="active">Awards</a>
+            <a href="awards.html" class="active" aria-current="page">Awards</a>
             <a href="news.html">News</a>
           </div>
-          <button class="nav-toggle" type="button" aria-label="Toggle menu">
+          <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
             <span></span><span></span><span></span>
           </button>
         </nav>
 
-        <div class="inner-content">
+        <main class="inner-content">
         <!-- Awards -->
-        <div id="awards" style="width:100%;margin-top:0px;padding:0px;">
+        <div id="awards">
           <heading>Awards &amp; Honors</heading>
           <hr>
-          <table style="margin-top:10px;width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-            <tr>
-              <td style="padding:0px;width:100%;vertical-align:middle">
-                <ul style="list-style-type: square; margin:0 7px 7px 0;">
-                    <li style="margin:0 7px 7px 0;">
-                      COMSNETS 2022 Best Ph.D. Thesis Award for my Ph.D. thesis.
-                    </li>
-                    
-                    <li style="margin:0 7px 7px 0;">
-                      Naik and Rastogi Excellence in Ph. D. Thesis Award (Best Thesis Award of IIT Bombay) for doctoral research.
-                    </li>
+          <ul class="item-list">
+              <li>
+                COMSNETS 2022 Best Ph.D. Thesis Award for my Ph.D. thesis.
+              </li>
 
-                    <li style="margin:0 7px 7px 0;"> 
-                      Microsoft Travel Grant (not used due to Covid-19 travel restrictions) and COMSNETS Association and LRN Foundation Travel Award for attending IEEE INFOCOM 2020. 
-                    </li>
+              <li>
+                Naik and Rastogi Excellence in Ph. D. Thesis Award (Best Thesis Award of IIT Bombay) for doctoral research.
+              </li>
 
-                    <li style="margin:0 7px 7px 0;">
-                      Travel Award from LinkedIn for attending FATE-ML workshop 2020 at IISc, Bengaluru, India.
-                    </li>
+              <li>
+                Microsoft Travel Grant (not used due to Covid-19 travel restrictions) and COMSNETS Association and LRN Foundation Travel Award for attending IEEE INFOCOM 2020.
+              </li>
 
-                    <li style="margin:0 7px 7px 0;">
-                      Google Travel Grant and NeurIPS Student Travel Award for attending NeurIPS 2019. 
-                    </li>
+              <li>
+                Travel Award from LinkedIn for attending FATE-ML workshop 2020 at IISc, Bengaluru, India.
+              </li>
 
-                    <li style="margin:0 7px 7px 0;">
-                      <a href="https://www.cefipra.org/Raman_Charpak.aspx" target="_blank">Raman-Charpak Fellowship</a> 2018 for visiting 
-                      SequeL Team of INRIA Lille, France.
-                    </li>
+              <li>
+                Google Travel Grant and NeurIPS Student Travel Award for attending NeurIPS 2019.
+              </li>
 
-                    <li style="margin:0 7px 7px 0;">
-                      ACM-India/IARCS and Microsoft Travel Grant for attending AISTATS 2019. 
-                    </li>
+              <li>
+                <a href="https://www.cefipra.org/Raman_Charpak.aspx" target="_blank">Raman-Charpak Fellowship</a> 2018 for visiting
+                SequeL Team of INRIA Lille, France.
+              </li>
 
-                    <li style="margin:0 7px 7px 0;">
-                      Technical Color Award of Hostel-14, IIT Bombay for year 2017-18 and 2018-19.
-                    </li>
+              <li>
+                ACM-India/IARCS and Microsoft Travel Grant for attending AISTATS 2019.
+              </li>
 
-                    <li style="margin:0 7px 7px 0;">
-                      Sports Color Award (Cricket) of Hostel-14, IIT Bombay for year 2017-18.
-                    </li>
+              <li>
+                Technical Color Award of Hostel-14, IIT Bombay for year 2017-18 and 2018-19.
+              </li>
 
-                    <li style="margin:0 7px 7px 0;">
-                      Conference Travel Awards from HiPC 2016, CoDS 2017, CoDS-COMAD 2018, AUAPAF 2018. 
-                    </li>
+              <li>
+                Sports Color Award (Cricket) of Hostel-14, IIT Bombay for year 2017-18.
+              </li>
 
-                    <li style="margin:0 7px 7px 0;">
-                      IITB Research Internship Award 2013-14 from Indian Institute of Technology Bombay.
-                    </li>
+              <li>
+                Conference Travel Awards from HiPC 2016, CoDS 2017, CoDS-COMAD 2018, AUAPAF 2018.
+              </li>
 
-                    <li style="margin:0 7px 7px 0;">
-                      Academic Excellence Award (Gold Medal) for having the highest CGPA in B.Tech.(CSE).
-                    </li>
-                </ul>
-              </td>
-            </tr>
-          </tbody></table> 
+              <li>
+                IITB Research Internship Award 2013-14 from Indian Institute of Technology Bombay.
+              </li>
+
+              <li>
+                Academic Excellence Award (Gold Medal) for having the highest CGPA in B.Tech.(CSE).
+              </li>
+          </ul>
         </div>
-  
-        
-        </div><!-- /.inner-content -->
+
+
+        </main><!-- /.inner-content -->
 
         <!-- Footer -->
-        <div class="site-footer">
+        <footer class="site-footer">
           <p>
-            &copy; 2026 Arun Verma 
-            &nbsp;·&nbsp; Last updated: 8 Oct 2026. 
+            &copy; 2026 Arun Verma
+            &nbsp;·&nbsp; Last updated: 13 Oct 2026.
           </p>
-        </div>
-          
-      </td>
-    </tr>
-  </table>
+        </footer>
 
-<script>
-document.querySelector('.nav-toggle').addEventListener('click', function() {
-  document.querySelector('.main-nav').classList.toggle('nav-open');
-});
-</script>
+  </div>
+
 </body>
 
 </html>
