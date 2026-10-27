@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 8 56 50" width="192" height="171">
+  <defs>
+    <linearGradient id="logo-curve" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0072B2" />
+      <stop offset=".55" stop-color="#009E73" />
+      <stop offset="1" stop-color="#CC79A7" />
+    </linearGradient>
+  </defs>
+  <rect x="26" y="14" width="32" height="42" rx="6" fill="rgba(0, 158, 115, .18)" />
+  <path d="M9 44 C 17 19, 45 17, 55 29" fill="none" stroke="url(#logo-curve)" stroke-width="3.6" stroke-linecap="round" />
+  <circle cx="12" cy="50" r="3.6" fill="#8a8f9c" />
+  <circle cx="22" cy="50" r="3.6" fill="#8a8f9c" />
+  <circle cx="32" cy="50" r="3.6" fill="#0072B2" />
+  <circle cx="42" cy="50" r="3.6" fill="#009E73" />
+  <circle cx="52" cy="50" r="3.6" fill="#CC79A7" />
+</svg>
